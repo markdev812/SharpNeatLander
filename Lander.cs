@@ -7,37 +7,45 @@ namespace SharpNeatLander
     {
         public const double StartingAltitude = 2400;
         public const double StartingFuel = 200;
-        public const double Gravity = -3.711;
+        public readonly Vector2 Gravity = new Vector2(0, -3.711);
+
         public const double TerminalVel = -200;
         public const double CrashSpeed = -40;
 
-        public double Altitude { get; private set; }
-        public double Velocity { get; private set; }
+        public Vector2 Position = new Vector2(0,0);
+        public double Rotation { get; set; }
+        //public double Altitude { get; private set; }
+        public Vector2 Velocity = new Vector2(0,0);
         public double Fuel { get; private set; }
-        public double Thrust { get; set; }
-
-        private double _gravity;
+        public Vector2 Thrust = new Vector2(0,0);
 
 
-        public void Init(double startingHeight, double startingFuel, double gravity)
+
+        public void Start()
         {
-            Altitude = startingHeight;
-            Fuel = startingFuel;
-            _gravity = gravity;
+            Position.Y = StartingAltitude;
+            Fuel = StartingFuel;
+
+
+            //CalcFitness(40, 0, 200, 20, 100);
         }
         public void Update(double deltaTime)
         {
             if (Fuel <= 0)
-                Thrust = 0;
-            Fuel -= Thrust * deltaTime;
-            Velocity += (Thrust + _gravity) * deltaTime;
+                Thrust = Vector2.Zero;
 
-            if (Velocity < TerminalVel)
-                Velocity = TerminalVel;
+            Fuel -= Thrust.Magnatude * deltaTime;
 
-            Altitude += Velocity * deltaTime;
-            if (Altitude < 0)
-                Altitude = 0;
+            Velocity += (Thrust + Gravity) * deltaTime;
+
+            if (Velocity.Y < TerminalVel)
+                Velocity.Y = TerminalVel;
+
+            Position += Velocity * deltaTime;
+
+
+            if (Position.Y < 0)
+                Position.Y = 0;
 
         }
         public static double RunSimulation(IBlackBox box, bool playMode = false)
@@ -47,13 +55,13 @@ namespace SharpNeatLander
 
             //run the simulation
             Lander ship = new Lander();
-            ship.Init(StartingAltitude, StartingFuel, Gravity);
+            ship.Start();
 
             for (int i = 1; i <= 100; i++)
             {
                 //set inputs
-                inputArr[0] = ship.Altitude / StartingAltitude;
-                inputArr[1] = ship.Velocity / TerminalVel;
+                inputArr[0] = ship.Position.Y / StartingAltitude;
+                inputArr[1] = ship.Velocity.Y / TerminalVel;
                 inputArr[2] = ship.Fuel / StartingFuel;
                 //inputArr[3] = (double)i / 100.0;
 
@@ -61,15 +69,15 @@ namespace SharpNeatLander
 
                 //if (outputArr[0] > 0.5)
                 //    ship.Thrust = 10;
-                ship.Thrust = Math.Round(outputArr[0] * 4); //Math.Floor(outputArr[0] * 4.0);
+                ship.Thrust.Y = Math.Round(outputArr[0] * 4); //Math.Floor(outputArr[0] * 4.0);
                 //Ship.Thrust = 3.42;
 
                 ship.Update(1);//0.25);
                 if (playMode)
-                    Console.WriteLine($"{i,-5}{ship.Altitude,8:F1}{ship.Velocity,8:F1}{ship.Fuel,8:F1}{ship.Thrust,8:F1}");
+                    Console.WriteLine($"{i,-5}{ship.Position.Y,8:F1}{ship.Velocity.Y,8:F1}{ship.Fuel,8:F1}{ship.Thrust.Y,8:F1}");
 
                 //did we hit the ground?
-                if (ship.Altitude <= 0)
+                if (ship.Position.Y <= 0)
                 {
 
                     break;
@@ -78,10 +86,10 @@ namespace SharpNeatLander
 
             }
 
-            return ship.CalcFitness();
+            return ship.GetFitness();
         }
 
-        double NormalizedFitness(double x, double origRangeA, double origRangeB, double desiredRangeA, double desiredRangeB)
+        double StandardizedRange(double x, double origRangeA, double origRangeB, double desiredRangeA, double desiredRangeB)
         {
             //A,B = original range
             //r1,r2 = desired range
@@ -89,22 +97,47 @@ namespace SharpNeatLander
             var fitness = 1 + (x - origRangeA) * (desiredRangeB - desiredRangeA) / (origRangeB - origRangeA);
             return fitness;
         }
+        /// <summary>
+        /// Calculate a fitness by normalizing and scaling the value by a "weight", centered around a desired "best" value
+        /// </summary>
+        /// <param name="x">incoming value</param>
+        /// <param name="min">value range mininum</param>
+        /// <param name="max">value range maximum</param>
+        /// <param name="best">best value for maximum fitness</param>
+        /// <param name="weight">importance of this value compared to others</param>
+        /// <returns></returns>
+        public double NormalizeFitness(double x, double min, double max, double best, double weight)
+        {
+            if (x < min || x > max)
+                return 0;
+
+            var offset = best - x;
+            var range = max - min;
+            var v = 1 + offset * 1 / range;
+            var fit = v * weight;
+            return fit;
+        }
 
 
-        public double CalcFitness()
+        public double GetFitness()
         {
 
 
-            double f = NormalizedFitness(Fuel, 1, StartingFuel, 1, 10);
-            double v = NormalizedFitness(Velocity, TerminalVel, CrashSpeed, 1, 10);
+            //double v = NormalizeFitness(Velocity.Y, TerminalVel, 0, CrashSpeed + 1, 100);
+
+            double f = NormalizeFitness(Fuel, 0, StartingFuel, StartingFuel, 10);
+            double v = NormalizeFitness(Velocity.Y, TerminalVel, 0, CrashSpeed + 1, 10);
             //double a = NormalizedFitness(Altitude, 1, StartingAltitude, 10, 1);
 
             double fitness = f + v;
-            if (Velocity > CrashSpeed)
+            if (Position.Y < 2 && Velocity.Y > CrashSpeed) //safe landing?
             {
-                f = NormalizedFitness(Fuel, 1, StartingFuel, 1, 100);
-                v = NormalizedFitness(Velocity, CrashSpeed, -1, 1, 20);
-                fitness += f + v;
+                fitness += 100;
+                //big bonus for fuel savings
+                //fitness += NormalizeFitness(Fuel, 0, StartingFuel, StartingFuel, 100); //StandardizedRange(Fuel, 1, StartingFuel, 1, 100);
+                //bonus for soft landing
+                //v = CalcFitness(Velocity, CrashSpeed + 1, -1, -2, 50);  // StandardizedRange(Velocity, CrashSpeed, -1, 1, 20);
+                //fitness += f;// + v;
                 //fitness += 100;
             }
             //double nFuel = Fuel / StartingFuel;
