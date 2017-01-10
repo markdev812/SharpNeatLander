@@ -2,9 +2,11 @@
 
 namespace SharpNeatLander
 {
-    class Vector2
+    public class Vector2
     {
         public readonly static Vector2 Zero = new Vector2(0, 0);
+        public readonly static Vector2 Up = new Vector2(0, 1);
+        public readonly static Vector2 Right = new Vector2(1, 0);
         public readonly static Vector2 One = new Vector2(1, 1);
 
 

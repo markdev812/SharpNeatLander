@@ -12,12 +12,12 @@ namespace SharpNeatLander
         public const double TerminalVel = -200;
         public const double CrashSpeed = -40;
 
-        public Vector2 Position = new Vector2(0,0);
+        public Vector2 Position = new Vector2(0, 0);
         public double Rotation { get; set; }
         //public double Altitude { get; private set; }
-        public Vector2 Velocity = new Vector2(0,0);
+        public Vector2 Velocity = new Vector2(0, 0);
         public double Fuel { get; private set; }
-        public Vector2 Thrust = new Vector2(0,0);
+        public double Thrust { get; private set; }
 
 
 
@@ -32,11 +32,17 @@ namespace SharpNeatLander
         public void Update(double deltaTime)
         {
             if (Fuel <= 0)
-                Thrust = Vector2.Zero;
+                Thrust = 0;
 
-            Fuel -= Thrust.Magnatude * deltaTime;
+            Fuel -= Thrust * deltaTime;
 
-            Velocity += (Thrust + Gravity) * deltaTime;
+            Vector2 thrustVec = Vector2.Up * Thrust;
+
+            thrustVec.Rotate(Rotation);
+
+            thrustVec += Gravity;
+
+            Velocity += thrustVec * deltaTime;
 
             if (Velocity.Y < TerminalVel)
                 Velocity.Y = TerminalVel;
@@ -69,12 +75,12 @@ namespace SharpNeatLander
 
                 //if (outputArr[0] > 0.5)
                 //    ship.Thrust = 10;
-                ship.Thrust.Y = Math.Round(outputArr[0] * 4); //Math.Floor(outputArr[0] * 4.0);
+                ship.Thrust = Math.Round(outputArr[0] * 4); //Math.Floor(outputArr[0] * 4.0);
                 //Ship.Thrust = 3.42;
 
                 ship.Update(1);//0.25);
                 if (playMode)
-                    Console.WriteLine($"{i,-5}{ship.Position.Y,8:F1}{ship.Velocity.Y,8:F1}{ship.Fuel,8:F1}{ship.Thrust.Y,8:F1}");
+                    Console.WriteLine($"T:{i,-5}A:{ship.Position.Y,8:F1}R:{ship.Rotation,8:F1}V:{ship.Velocity.Y,8:F1}F:{ship.Fuel,8:F1}T:{ship.Thrust,8:F1}");
 
                 //did we hit the ground?
                 if (ship.Position.Y <= 0)
