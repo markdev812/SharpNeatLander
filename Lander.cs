@@ -36,13 +36,11 @@ namespace SharpNeatLander
 
             Fuel -= Thrust * deltaTime;
 
-            Vector2 thrustVec = Vector2.Up * Thrust;
+            Vector2 dir = Vector2.Up * Gravity;
 
-            thrustVec.Rotate(Rotation);
-
-            thrustVec += Gravity;
-
-            Velocity += thrustVec * deltaTime;
+            dir.Rotate(Rotation);
+  
+            Velocity += dir * Thrust * deltaTime;
 
             if (Velocity.Y < TerminalVel)
                 Velocity.Y = TerminalVel;
@@ -56,6 +54,13 @@ namespace SharpNeatLander
         }
         public static double RunSimulation(IBlackBox box, bool playMode = false)
         {
+            double thrust = 4;
+            double gravity = -3.711;
+            Vector2 dir = Vector2.Up * gravity; 
+            dir.Rotate(45);
+            Vector2 pos = dir*thrust;
+
+
             ISignalArray inputArr = box.InputSignalArray;
             ISignalArray outputArr = box.OutputSignalArray;
 

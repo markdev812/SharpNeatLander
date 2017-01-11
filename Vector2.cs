@@ -9,11 +9,14 @@ namespace SharpNeatLander
         public readonly static Vector2 Right = new Vector2(1, 0);
         public readonly static Vector2 One = new Vector2(1, 1);
 
+        public const double Deg2Rad = (Math.PI * 2.0) / 360.0;
+        public const double Rad2Deg = 360.0 / (Math.PI * 2.0);
+
 
         public double X { get; set; }
         public double Y { get; set; }
 
-        public double Magnatude { get { return Length; } }
+        public double Magnitude { get { return Length; } }
 
         public double Length { get { return Math.Sqrt(SquaredLength); } }
 
@@ -29,7 +32,8 @@ namespace SharpNeatLander
         {
             get
             {
-                return Math.Atan2(Y, X);
+                double d = Math.Atan2(Y, X) * Rad2Deg;
+                return d + 270;
             }
         }
         public Vector2(double x, double y)
@@ -71,10 +75,12 @@ namespace SharpNeatLander
             Y = Y / len;
         }
 
-        public void Rotate(double angle)
+        public void Rotate(double degrees)
         {
-            double x = X * Math.Cos(angle) - Y * Math.Sin(angle);
-            double y = X * Math.Sin(angle) + Y * Math.Cos(angle);
+
+            double r = degrees * Deg2Rad;
+            double x = X * Math.Cos(r) - Y * Math.Sin(r);
+            double y = X * Math.Sin(r) + Y * Math.Cos(r);
             X = x;
             Y = y;
         }
