@@ -6,6 +6,8 @@ namespace SharpNeatLander
     {
         public readonly static Vector2 Zero = new Vector2(0, 0);
         public readonly static Vector2 Up = new Vector2(0, 1);
+        public readonly static Vector2 Down = new Vector2(0, -1);
+        public readonly static Vector2 Left = new Vector2(-1, 0);
         public readonly static Vector2 Right = new Vector2(1, 0);
         public readonly static Vector2 One = new Vector2(1, 1);
 
@@ -19,6 +21,12 @@ namespace SharpNeatLander
         public double Magnitude { get { return Length; } }
 
         public double Length { get { return Math.Sqrt(SquaredLength); } }
+
+        public bool DoubleEquals(double d1, double d2)
+        {
+            double diff = d2 - d1;
+            return (diff < 0.000001 && diff > -0.000001);
+        }
 
         public double SquaredLength
         {
@@ -57,7 +65,7 @@ namespace SharpNeatLander
                 return false;
 
             Vector2 other = ((Vector2)obj);
-            return (X == other.X) && (Y == other.Y);
+            return (DoubleEquals(X, other.X) && DoubleEquals(Y, other.Y));
         }
         public override int GetHashCode()
         {
@@ -75,14 +83,16 @@ namespace SharpNeatLander
             Y = Y / len;
         }
 
-        public void Rotate(double degrees)
+        public static Vector2 FromAngle(double degrees)
         {
+            degrees *= Deg2Rad;
+            return new Vector2(Math.Cos(degrees), Math.Sin(degrees));
 
-            double r = degrees * Deg2Rad;
-            double x = X * Math.Cos(r) - Y * Math.Sin(r);
-            double y = X * Math.Sin(r) + Y * Math.Cos(r);
-            X = x;
-            Y = y;
+            //double r = degrees * Deg2Rad;
+            //double x = X * Math.Cos(r) - Y * Math.Sin(r);
+            //double y = X * Math.Sin(r) + Y * Math.Cos(r);
+            //X = x;
+            //Y = y;
         }
         /*----------------------- Operator overloading below ------------------------------*/
         public static bool operator ==(Vector2 v1, Vector2 v2)
