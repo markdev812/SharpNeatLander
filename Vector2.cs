@@ -22,12 +22,6 @@ namespace SharpNeatLander
 
         public double Length { get { return Math.Sqrt(SquaredLength); } }
 
-        public bool DoubleEquals(double d1, double d2)
-        {
-            double diff = d2 - d1;
-            return (diff < 0.000001 && diff > -0.000001);
-        }
-
         public double SquaredLength
         {
             get
@@ -40,8 +34,8 @@ namespace SharpNeatLander
         {
             get
             {
-                double d = Math.Atan2(Y, X) * Rad2Deg;
-                return d + 270;
+                return Math.Atan2(Y, X) * Rad2Deg;
+                
             }
         }
         public Vector2(double x, double y)
@@ -65,7 +59,8 @@ namespace SharpNeatLander
                 return false;
 
             Vector2 other = ((Vector2)obj);
-            return (DoubleEquals(X, other.X) && DoubleEquals(Y, other.Y));
+
+            return (X.AlmostEquals(other.X) && Y.AlmostEquals(other.Y));
         }
         public override int GetHashCode()
         {

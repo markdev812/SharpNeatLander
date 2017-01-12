@@ -18,6 +18,7 @@ namespace SharpNeatLander
         static void Main()//string[] args)
         {
 
+
             // Experiment classes encapsulate much of the nuts and bolts of setting up a NEAT search.
             _experiment = new SimpleExperiment();
 

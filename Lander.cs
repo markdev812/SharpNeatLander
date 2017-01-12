@@ -5,15 +5,19 @@ namespace SharpNeatLander
 {
     public class Lander
     {
-        public const double StartingAltitude = 2400;
+        //public const double StartingAltitude = 2400;
         public const double ViewWidth = 1000;
         public const double StartingFuel = 500;
         public readonly Vector2 Gravity = new Vector2(0, -3.711);
 
         public const double TerminalVel = -200;
-        public const double CrashSpeed = -40;
+        public const double CrashSpeed = -20;
+        
+        public readonly Vector2 StartPos = new Vector2(100, 2400);
+        public readonly Vector2 TargetPos = new Vector2(400, 0);
 
         public Vector2 Position = new Vector2(0, 0);
+        public double DesiredRotation { get; set; }
         public double Rotation { get; set; }
         //public double Altitude { get; private set; }
         public Vector2 Velocity = new Vector2(0, 0);
@@ -24,8 +28,7 @@ namespace SharpNeatLander
 
         public void Start()
         {
-            Position.X = 600; //right of center
-            Position.Y = StartingAltitude;
+            Position = StartPos;
             Fuel = StartingFuel;
             Rotation = 90; //up
 
@@ -38,6 +41,7 @@ namespace SharpNeatLander
 
             Fuel -= Thrust * deltaTime;
 
+            Rotation = Mathf.Lerp(Rotation, DesiredRotation, deltaTime / 8);
             if (Rotation > 135)
                 Rotation = 135;
             else if (Rotation < 45)
@@ -74,19 +78,19 @@ namespace SharpNeatLander
             for (int i = 1; i <= 100; i++)
             {
                 //set inputs
-                inputArr[0] = ship.Position.X / ViewWidth;
-                inputArr[1] = ship.Position.Y / StartingAltitude;
-                inputArr[2] = ship.Velocity.X / TerminalVel;
-                inputArr[3] = ship.Velocity.Y / TerminalVel;
-                inputArr[4] = ship.Fuel / StartingFuel;
+                inputArr[0] = ship.Position.X;/// ViewWidth;
+                inputArr[1] = ship.Position.Y;/// StartingAltitude;
+                inputArr[2] = ship.Velocity.X;/// TerminalVel;
+                inputArr[3] = ship.Velocity.Y;/// TerminalVel;
+                inputArr[4] = ship.Fuel;/// StartingFuel;
                 //inputArr[3] = (double)i / 100.0;
 
                 box.Activate();
 
                 //if (outputArr[0] > 0.5)
                 //    ship.Thrust = 10;
-                ship.Thrust = Math.Round(outputArr[0] * 6); //Math.Floor(outputArr[0] * 4.0);
-                ship.Rotation = outputArr[1] * 360.0;
+                ship.Thrust = Math.Round(outputArr[0] * 5); //Math.Floor(outputArr[0] * 4.0);
+                ship.DesiredRotation = outputArr[1] * 360.0;
                 //Ship.Thrust = 3.42;
 
                 ship.Update(1);//0.25);
@@ -145,12 +149,14 @@ namespace SharpNeatLander
             //double v = NormalizeFitness(Velocity.Y, TerminalVel, 0, CrashSpeed + 1, 100);
 
             double f = NormalizeFitness(Fuel, 0, StartingFuel, StartingFuel, 10);
-            double v = NormalizeFitness(Velocity.Y, TerminalVel, 0, CrashSpeed + 1, 100);
-            double x = NormalizeFitness(Position.X, 0, ViewWidth, 500, 200);
+            double r = NormalizeFitness(Rotation, 0, 360, 90, 100);
+            double vx = NormalizeFitness(Velocity.X, -100, 100, 0, 50);
+            double vy = NormalizeFitness(Velocity.Y, TerminalVel, 0, CrashSpeed + 1, 100);
+            double x = NormalizeFitness(Position.X, 0, ViewWidth, TargetPos.X, 50);
             //double a = NormalizedFitness(Altitude, 1, StartingAltitude, 10, 1);
 
-            double fitness = f + v + x;
-            if (Position.Y < 2 && Velocity.Y > CrashSpeed && Math.Abs(Velocity.X) < 5) //safe landing?
+            double fitness = f + vx + vy + x + r;
+            if (Position.Y < 2 && Math.Abs(Position.X - TargetPos.X) < 5 && Velocity.Y > CrashSpeed && Math.Abs(Velocity.X) < 2 && Rotation > 85 && Rotation < 95) //safe landing?
             {
                 fitness += 1000;
                 //big bonus for fuel savings
