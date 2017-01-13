@@ -1,5 +1,6 @@
 ﻿using SharpNeat.Phenomes;
 using System;
+using System.Drawing;
 
 namespace SharpNeatLander
 {
@@ -12,7 +13,7 @@ namespace SharpNeatLander
 
         public const double TerminalVel = -200;
         public const double CrashSpeed = -20;
-        
+
         public readonly Vector2 StartPos = new Vector2(100, 2400);
         public readonly Vector2 TargetPos = new Vector2(400, 0);
 
@@ -63,52 +64,29 @@ namespace SharpNeatLander
                 Position.Y = 0;
 
         }
-        public static double RunSimulation(IBlackBox box, bool playMode = false)
+
+        public void Compute(IBlackBox box)
         {
-
-
-
             ISignalArray inputArr = box.InputSignalArray;
             ISignalArray outputArr = box.OutputSignalArray;
 
-            //run the simulation
-            Lander ship = new Lander();
-            ship.Start();
+            //set inputs
+            inputArr[0] = Position.X;/// ViewWidth;
+            inputArr[1] = Position.Y;/// StartingAltitude;
+            inputArr[2] = Velocity.X;/// TerminalVel;
+            inputArr[3] = Velocity.Y;/// TerminalVel;
+            inputArr[4] = Fuel;/// StartingFuel;
+            //inputArr[3] = (double)i / 100.0;
 
-            for (int i = 1; i <= 100; i++)
-            {
-                //set inputs
-                inputArr[0] = ship.Position.X;/// ViewWidth;
-                inputArr[1] = ship.Position.Y;/// StartingAltitude;
-                inputArr[2] = ship.Velocity.X;/// TerminalVel;
-                inputArr[3] = ship.Velocity.Y;/// TerminalVel;
-                inputArr[4] = ship.Fuel;/// StartingFuel;
-                //inputArr[3] = (double)i / 100.0;
+            box.Activate();
 
-                box.Activate();
-
-                //if (outputArr[0] > 0.5)
-                //    ship.Thrust = 10;
-                ship.Thrust = Math.Round(outputArr[0] * 5); //Math.Floor(outputArr[0] * 4.0);
-                ship.DesiredRotation = outputArr[1] * 360.0;
-                //Ship.Thrust = 3.42;
-
-                ship.Update(1);//0.25);
-                if (playMode)
-                    Console.WriteLine($"S:{i,-5}  X:{ship.Position.X,6:F1}  A:{ship.Position.Y,6:F1}  R:{ship.Rotation,6:F1}  Vx:{ship.Velocity.X,6:F1} Vy:{ship.Velocity.Y,6:F1} F:{ship.Fuel,6:F1}  T:{ship.Thrust,6:F1}");
-
-                //did we hit the ground?
-                if (ship.Position.Y <= 0)
-                {
-
-                    break;
-                }
-
-
-            }
-
-            return ship.GetFitness();
+            //if (outputArr[0] > 0.5)
+            //    ship.Thrust = 10;
+            Thrust = Math.Round(outputArr[0] * 5); //Math.Floor(outputArr[0] * 4.0);
+            DesiredRotation = outputArr[1] * 360.0;
         }
+
+
 
         public static double StandardizedRange(double x, double origRangeA, double origRangeB, double desiredRangeA, double desiredRangeB)
         {
@@ -191,6 +169,27 @@ namespace SharpNeatLander
             //}
             //Console.WriteLine($"{Altitude,8:F1}{Velocity,8:F1}{Fuel,8:F1}{Thrust,8:F1}");
             return fitness > 0 ? fitness : 0;
+        }
+
+        public int WorldToView(double val)
+        {
+            double viewScale = 0.25;
+            return (int)Math.Round(val * viewScale);
+
+        }
+        public void Render(Graphics g)
+        {
+            //draw a triangle to represent lander for now
+
+            var pen = new Pen(Color.White, 2);
+            Point[] lines = new Point[3]
+            {
+                new Point(WorldToView(Position.X), WorldToView(Position.Y) - 10),
+                new Point(WorldToView(Position.X)-5, WorldToView(Position.Y) +5),
+               new Point(WorldToView(Position.X)+5, WorldToView(Position.Y) - 5),
+
+            };
+            g.DrawLines(pen, lines);
         }
     }
 }
