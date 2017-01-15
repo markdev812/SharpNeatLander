@@ -3,7 +3,7 @@ using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Phenomes;
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Drawing;
 using System.Threading;
@@ -15,13 +15,16 @@ namespace SharpNeatLander
     public partial class FrmMain : Form
     {
 
+        private const double FixedDeltaTime = 0.1;
+        private static readonly Vector2 ViewScale = new Vector2(0.6, 0.6);
 
         private static SimpleExperiment _experiment;
         private Button btnStopEA;
         private Button btnStopRunning;
         static NeatEvolutionAlgorithm<NeatGenome> _ea;
         private bool _running;
-        List<Lander> renderList = new List<Lander>();
+        private static readonly ConcurrentBag<Lander> _renderList = new ConcurrentBag<Lander>();
+        public static FrmMain Instance = null;
 
         public FrmMain()
         {
@@ -30,19 +33,24 @@ namespace SharpNeatLander
 
         private void FrmMain_Load(object sender, System.EventArgs e)
         {
-
+            Instance = this;
             picBox.Paint += new PaintEventHandler(this.picBox1_Paint);
         }
 
         private void picBox1_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            foreach (var obj in renderList)
+            foreach (var obj in _renderList)
             {
                 obj.Render(g);
             }
         }
+        public Point WorldToView(Vector2 pos)
+        {
 
+            return new Point((int)Math.Round(pos.X * ViewScale.Y), picBox.Height - (int)Math.Round(pos.Y * ViewScale.Y));
+
+        }
         private void btnLearn_Click(object sender, System.EventArgs e)
         {
             // Experiment classes encapsulate much of the nuts and bolts of setting up a NEAT search.
@@ -62,26 +70,23 @@ namespace SharpNeatLander
         {
             Lander ship = new Lander();
             ship.Start();
-
-            for (int i = 1; i <= 100; i++)
+            // _renderList.Add(ship);
+            for (int i = 1; i <= 300; i++)
             {
                 ship.Compute(box);
                 //Ship.Thrust = 3.42;
 
-                ship.Update(1);//0.25);
+                ship.Update(0.1);//0.25);
                 //if (playMode)
                 //    Console.WriteLine($"S:{i,-5}  X:{ship.Position.X,6:F1}  A:{ship.Position.Y,6:F1}  R:{ship.Rotation,6:F1}  Vx:{ship.Velocity.X,6:F1} Vy:{ship.Velocity.Y,6:F1} F:{ship.Fuel,6:F1}  T:{ship.Thrust,6:F1}");
-
-                //did we hit the ground?
-                if (ship.Position.Y <= 0)
-                {
-
+                FrmMain.Instance.picBox.Invalidate();
+                if (ship.Finished)
                     break;
-                }
 
 
             }
-
+            //Lander dummy;
+            //_renderList.TryTake(out dummy);
             return ship.GetFitness();
         }
 
@@ -123,26 +128,39 @@ namespace SharpNeatLander
             Stopwatch sw = new Stopwatch();
             sw.Start();
             //add obj to render list
-            renderList.Add(ship);
-            double prevTime = 0, currTime = 0;
+            _renderList.Add(ship);
+
             while (_running)
             {
                 ship.Compute(bestLander);
 
-                currTime = (double)sw.ElapsedMilliseconds / 1000.0;
-                double deltaTime = currTime - prevTime;
-                ship.Update(deltaTime);
 
-                prevTime = currTime;
+                ship.Update(FixedDeltaTime);
+                picBox.Invalidate();
 
-                Debug.WriteLine($"S:{deltaTime,-5:F2}  X:{ship.Position.X,6:F1}  A:{ship.Position.Y,6:F1}  R:{ship.Rotation,6:F1}  Vx:{ship.Velocity.X,6:F1} Vy:{ship.Velocity.Y,6:F1} F:{ship.Fuel,6:F1}  T:{ship.Thrust,6:F1}");
+                Debug.WriteLine($"S:{FixedDeltaTime,-5:F2}  X:{ship.Position.X,6:F1}  A:{ship.Position.Y,6:F1}  R:{ship.Rotation,6:F1}  Vx:{ship.Velocity.X,6:F1} Vy:{ship.Velocity.Y,6:F1} F:{ship.Fuel,6:F1}  T:{ship.Thrust,6:F1}");
 
-                Thread.Sleep(100);
+                if (ship.Finished)
+                    _running = false;
+
+                Thread.Sleep((int)(FixedDeltaTime * 1000.0));
             }
-            renderList.Remove(ship);
+            Lander dummy;
+            _renderList.TryTake(out dummy);
         }
 
         private void btnStopRunning_Click(object sender, EventArgs e)
+        {
+            _running = false;
+        }
+
+        private void btnExit_Click(object sender, EventArgs e)
+        {
+            _running = false;
+            Close();
+        }
+
+        private void FrmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             _running = false;
         }

@@ -35,8 +35,8 @@ namespace SharpNeatLander
             this.btnRunBest = new System.Windows.Forms.Button();
             this.btnReset = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.btnExit = new System.Windows.Forms.Button();
             this.btnStopEA = new System.Windows.Forms.Button();
+            this.btnExit = new System.Windows.Forms.Button();
             this.btnStopRunning = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.picBox)).BeginInit();
             this.panel1.SuspendLayout();
@@ -48,7 +48,7 @@ namespace SharpNeatLander
             this.picBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.picBox.Location = new System.Drawing.Point(0, 0);
             this.picBox.Name = "picBox";
-            this.picBox.Size = new System.Drawing.Size(656, 390);
+            this.picBox.Size = new System.Drawing.Size(849, 551);
             this.picBox.TabIndex = 0;
             this.picBox.TabStop = false;
             // 
@@ -90,19 +90,10 @@ namespace SharpNeatLander
             this.panel1.Controls.Add(this.btnStopRunning);
             this.panel1.Controls.Add(this.btnRunBest);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panel1.Location = new System.Drawing.Point(564, 0);
+            this.panel1.Location = new System.Drawing.Point(757, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(92, 390);
+            this.panel1.Size = new System.Drawing.Size(92, 551);
             this.panel1.TabIndex = 2;
-            // 
-            // btnExit
-            // 
-            this.btnExit.Location = new System.Drawing.Point(10, 355);
-            this.btnExit.Name = "btnExit";
-            this.btnExit.Size = new System.Drawing.Size(75, 23);
-            this.btnExit.TabIndex = 1;
-            this.btnExit.Text = "Exit";
-            this.btnExit.UseVisualStyleBackColor = true;
             // 
             // btnStopEA
             // 
@@ -113,6 +104,16 @@ namespace SharpNeatLander
             this.btnStopEA.Text = "Stop EA";
             this.btnStopEA.UseVisualStyleBackColor = true;
             this.btnStopEA.Click += new System.EventHandler(this.btnStop_Click);
+            // 
+            // btnExit
+            // 
+            this.btnExit.Location = new System.Drawing.Point(10, 355);
+            this.btnExit.Name = "btnExit";
+            this.btnExit.Size = new System.Drawing.Size(75, 23);
+            this.btnExit.TabIndex = 1;
+            this.btnExit.Text = "Exit";
+            this.btnExit.UseVisualStyleBackColor = true;
+            this.btnExit.Click += new System.EventHandler(this.btnExit_Click);
             // 
             // btnStopRunning
             // 
@@ -126,10 +127,11 @@ namespace SharpNeatLander
             // 
             // FrmMain
             // 
-            this.ClientSize = new System.Drawing.Size(656, 390);
+            this.ClientSize = new System.Drawing.Size(849, 551);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.picBox);
             this.Name = "FrmMain";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FrmMain_FormClosing);
             this.Load += new System.EventHandler(this.FrmMain_Load);
             ((System.ComponentModel.ISupportInitialize)(this.picBox)).EndInit();
             this.panel1.ResumeLayout(false);

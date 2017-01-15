@@ -9,13 +9,21 @@ namespace SharpNeatLander
         //public const double StartingAltitude = 2400;
         public const double ViewWidth = 1000;
         public const double StartingFuel = 500;
+        public const double MaxThrust = 6;
+
+        //90 deg = up, CCW = positive rotation
+        public const double MinRot = 30;
+        public const double MaxRot = 120;
+        public const double RotationRate = 30; // deg/second
+
+
         public readonly Vector2 Gravity = new Vector2(0, -3.711);
 
         public const double TerminalVel = -200;
         public const double CrashSpeed = -20;
 
-        public readonly Vector2 StartPos = new Vector2(100, 2400);
-        public readonly Vector2 TargetPos = new Vector2(400, 0);
+        public readonly Vector2 StartPos = new Vector2(100, 50);
+        public readonly Vector2 TargetPos = new Vector2(1000, 200);
 
         public Vector2 Position = new Vector2(0, 0);
         public double DesiredRotation { get; set; }
@@ -25,6 +33,8 @@ namespace SharpNeatLander
         public double Fuel { get; private set; }
         public double Thrust { get; private set; }
 
+
+        public bool Finished => (Vector2.Distance(TargetPos, Position) < 5) || (Fuel <= 0.01);
 
 
         public void Start()
@@ -42,17 +52,16 @@ namespace SharpNeatLander
 
             Fuel -= Thrust * deltaTime;
 
-            Rotation = Mathf.Lerp(Rotation, DesiredRotation, deltaTime / 8);
-            if (Rotation > 135)
-                Rotation = 135;
-            else if (Rotation < 45)
-                Rotation = 45;
+            Rotation = Mathf.Lerp(Rotation, DesiredRotation, RotationRate * deltaTime);
+            //Rotation = DesiredRotation;
+            Rotation = Mathf.Clamp(Rotation, MinRot, MaxRot);
+
 
 
             Vector2 rot = Vector2.FromAngle(Rotation);
 
-            Velocity += rot * Thrust;
-            Velocity += Gravity;
+            Velocity += rot * Thrust * deltaTime;
+            Velocity += Gravity * deltaTime;
 
             //if (Velocity.Y < TerminalVel)
             //    Velocity.Y = TerminalVel;
@@ -82,7 +91,7 @@ namespace SharpNeatLander
 
             //if (outputArr[0] > 0.5)
             //    ship.Thrust = 10;
-            Thrust = Math.Round(outputArr[0] * 5); //Math.Floor(outputArr[0] * 4.0);
+            Thrust = outputArr[0] * MaxThrust;//Math.Round(outputArr[0] * 5); //Math.Floor(outputArr[0] * 4.0);
             DesiredRotation = outputArr[1] * 360.0;
         }
 
@@ -118,32 +127,70 @@ namespace SharpNeatLander
             var fit = v * weight;
             return fit;
         }
-
+        /// <summary>
+        /// Sigmoid function
+        /// </summary>
+        /// <param name="x"></param>
+        /// <returns>0 to 1</returns>
+        public static double Sigmoid2(double x)
+        {
+            return 1 / (1 + Math.Exp(-x));
+        }
+        public static double SigmoidDerivative2(double x)
+        {
+            double s = Sigmoid(x);
+            return s * (1 - s);
+        }
+        /// <summary>
+        /// Sigmoid function
+        /// </summary>
+        /// <param name="x"></param>
+        /// <returns>-1 to 1</returns>
+        public static double Sigmoid(double x)
+        {
+            return 2 / (1 + Math.Exp(-2 * x)) - 1;
+        }
+        public static double SigmoidDerivative(double x)
+        {
+            double s = Sigmoid(x);
+            return 1 - (Math.Pow(s, 2));
+        }
+        public static double CalcFitness(double x, double best, double weight)
+        {
+            double diff = Math.Abs(best - x);
+            double r = 1 - (diff / best);
+            return r * weight;
+        }
 
         public double GetFitness()
         {
 
 
-            //double v = NormalizeFitness(Velocity.Y, TerminalVel, 0, CrashSpeed + 1, 100);
+            //double f = 0;//NormalizeFitness(Fuel, 0, StartingFuel, StartingFuel, 10);
+            //double r = NormalizeFitness(Rotation, 0, 360, 90, 100);
+            //double vx = 0;//NormalizeFitness(Velocity.X, -20, 20, 0, 10);
+            //double vy = NormalizeFitness(Velocity.Y, TerminalVel, 0, CrashSpeed + 1, 100);
+            //double x =  NormalizeFitness(Position.X, 0, ViewWidth, TargetPos.X, 10);
 
-            double f = NormalizeFitness(Fuel, 0, StartingFuel, StartingFuel, 10);
-            double r = NormalizeFitness(Rotation, 0, 360, 90, 100);
-            double vx = NormalizeFitness(Velocity.X, -100, 100, 0, 50);
-            double vy = NormalizeFitness(Velocity.Y, TerminalVel, 0, CrashSpeed + 1, 100);
-            double x = NormalizeFitness(Position.X, 0, ViewWidth, TargetPos.X, 50);
-            //double a = NormalizedFitness(Altitude, 1, StartingAltitude, 10, 1);
+            double d = Vector2.Distance(TargetPos, Position);
+            double fitness = NormalizeFitness(d, 0, 2000, 0, 20);
+            fitness += NormalizeFitness(Velocity.Magnitude, 0, 100, 1, 10);
 
-            double fitness = f + vx + vy + x + r;
-            if (Position.Y < 2 && Math.Abs(Position.X - TargetPos.X) < 5 && Velocity.Y > CrashSpeed && Math.Abs(Velocity.X) < 2 && Rotation > 85 && Rotation < 95) //safe landing?
-            {
-                fitness += 1000;
-                //big bonus for fuel savings
-                //fitness += NormalizeFitness(Fuel, 0, StartingFuel, StartingFuel, 100); //StandardizedRange(Fuel, 1, StartingFuel, 1, 100);
-                //bonus for soft landing
-                //v = CalcFitness(Velocity, CrashSpeed + 1, -1, -2, 50);  // StandardizedRange(Velocity, CrashSpeed, -1, 1, 20);
-                //fitness += f;// + v;
-                //fitness += 100;
-            }
+
+
+            // double fitness = f + vx + vy + x + r;
+            //if (d < 2)// && Math.Abs(Position.X - TargetPos.X) < 5 && Velocity.Y > CrashSpeed)// && Math.Abs(Velocity.X) < 2 && Rotation > 85 && Rotation < 95) //safe landing?
+            //{
+
+            //fitness += 100;
+            //fitness += NormalizeFitness(Velocity.Magnitude, 0, 100, 1, 10);
+            //big bonus for fuel savings
+            //fitness += NormalizeFitness(Fuel, 0, StartingFuel, StartingFuel, 100); //StandardizedRange(Fuel, 1, StartingFuel, 1, 100);
+            //bonus for soft landing
+            //v = CalcFitness(Velocity, CrashSpeed + 1, -1, -2, 50);  // StandardizedRange(Velocity, CrashSpeed, -1, 1, 20);
+            //fitness += f;// + v;
+            //fitness += 100;
+            //}
             //double nFuel = Fuel / StartingFuel;
             //double nVelocity = Velocity / TerminalVel;
             //double nAltitude = Altitude / StartingAltitude;
@@ -171,25 +218,37 @@ namespace SharpNeatLander
             return fitness > 0 ? fitness : 0;
         }
 
-        public int WorldToView(double val)
-        {
-            double viewScale = 0.25;
-            return (int)Math.Round(val * viewScale);
 
-        }
         public void Render(Graphics g)
         {
             //draw a triangle to represent lander for now
 
-            var pen = new Pen(Color.White, 2);
-            Point[] lines = new Point[3]
+
+            Point[] lines = new Point[4]
             {
-                new Point(WorldToView(Position.X), WorldToView(Position.Y) - 10),
-                new Point(WorldToView(Position.X)-5, WorldToView(Position.Y) +5),
-               new Point(WorldToView(Position.X)+5, WorldToView(Position.Y) - 5),
+                FrmMain.Instance.WorldToView(new Vector2(Position.X,Position.Y + 50)),
+                FrmMain.Instance.WorldToView(new Vector2(Position.X -20,Position.Y)),
+                FrmMain.Instance.WorldToView(new Vector2(Position.X+20,Position.Y )),
+                FrmMain.Instance.WorldToView(new Vector2(Position.X,Position.Y + 50 )),
 
             };
-            g.DrawLines(pen, lines);
+            g.DrawLines(new Pen(Color.White, 2), lines);
+
+            Vector2 rot = Vector2.FromAngle(Rotation) * Thrust * 10;
+            Point[] rotLines = new Point[2]
+           {
+                FrmMain.Instance.WorldToView(new Vector2(Position.X,Position.Y)),
+                FrmMain.Instance.WorldToView(new Vector2(Position.X - rot.X,Position.Y-rot.Y)),
+
+           };
+            g.DrawLines(new Pen(Color.Gold, 2), rotLines);
+
+            Point start = FrmMain.Instance.WorldToView(StartPos);
+            Point targ = FrmMain.Instance.WorldToView(TargetPos);
+
+            g.DrawRectangle(new Pen(Color.White), new Rectangle(start.X-10,start.Y,20,5));
+            g.DrawRectangle(new Pen(Color.White), new Rectangle(targ.X - 10, targ.Y, 20, 5));
+
         }
     }
 }

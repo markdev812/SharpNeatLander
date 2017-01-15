@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SharpNeatLander;
+using System.Diagnostics;
 
 namespace UnitTests
 {
@@ -39,11 +40,11 @@ namespace UnitTests
         [TestMethod]
         public void VelocityTest()
         {
-            Vector2 g = Vector2.Up*-3.711;
+            Vector2 g = Vector2.Up * -3.711;
 
             Vector2 rot = Vector2.FromAngle(90);
 
-            Vector2 vel = rot*4;
+            Vector2 vel = rot * 4;
             vel += g;
 
             Assert.IsTrue(vel == new Vector2(0, 0.289));
@@ -56,7 +57,14 @@ namespace UnitTests
             Assert.IsTrue(Lander.NormalizeFitness(1000, 0, 1000, 500, 200).AlmostEquals(100));
             Assert.IsTrue(Lander.NormalizeFitness(500, 0, 1000, 500, 200).AlmostEquals(200));
         }
+        [TestMethod]
+        public void CalcFitnessTest()
+        {
+            Assert.IsTrue(Lander.CalcFitness(50, 100, 200).AlmostEquals(100));
+            Assert.IsTrue(Lander.CalcFitness(50, -100, 200).AlmostEquals(100));
 
+
+        }
         [TestMethod]
         public void AngleTest()
         {
@@ -66,6 +74,16 @@ namespace UnitTests
             Assert.IsTrue(Vector2.Down.Angle.AlmostEquals(-90));
         }
 
+        [TestMethod]
+        public void DistanceTest()
+        {
+            double d = Vector2.Distance(new Vector2(1, 1), new Vector2(2, 2));
+            Assert.IsTrue(d.AlmostEquals(1.414213562373095));
+            d = Vector2.Distance(new Vector2(-1, -1), new Vector2(-2, -2));
+            Assert.IsTrue(d.AlmostEquals(1.414213562373095));
+            d = Vector2.Distance(new Vector2(-1, -1), new Vector2(1, 1));
+            Assert.IsTrue(d.AlmostEquals(2.82842712474619));
+        }
         [TestMethod]
         public void LerpTest()
         {

@@ -35,7 +35,7 @@ namespace SharpNeatLander
             get
             {
                 return Math.Atan2(Y, X) * Rad2Deg;
-                
+
             }
         }
         public Vector2(double x, double y)
@@ -88,6 +88,13 @@ namespace SharpNeatLander
             //double y = X * Math.Sin(r) + Y * Math.Cos(r);
             //X = x;
             //Y = y;
+        }
+
+        public static double Distance(Vector2 v1, Vector2 v2)
+        {
+            double dx = v2.X - v1.X;
+            double dy = v2.Y - v1.Y;
+            return Math.Sqrt((dx * dx) + (dy * dy));
         }
         /*----------------------- Operator overloading below ------------------------------*/
         public static bool operator ==(Vector2 v1, Vector2 v2)
