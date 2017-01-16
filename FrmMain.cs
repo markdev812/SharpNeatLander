@@ -15,8 +15,8 @@ namespace SharpNeatLander
     public partial class FrmMain : Form
     {
 
-        private const double FixedDeltaTime = 0.1;
-        private static readonly Vector2 ViewScale = new Vector2(0.6, 0.6);
+        public static double FixedDeltaTime = 0.1;
+        public static double ViewScale = 0.6;
 
         private static SimpleExperiment _experiment;
         private Button btnStopEA;
@@ -48,7 +48,7 @@ namespace SharpNeatLander
         public Point WorldToView(Vector2 pos)
         {
 
-            return new Point((int)Math.Round(pos.X * ViewScale.Y), picBox.Height - (int)Math.Round(pos.Y * ViewScale.Y));
+            return new Point((int)Math.Round(pos.X * ViewScale), picBox.Height - (int)Math.Round(pos.Y * ViewScale));
 
         }
         private void btnLearn_Click(object sender, System.EventArgs e)
@@ -70,13 +70,13 @@ namespace SharpNeatLander
         {
             Lander ship = new Lander();
             ship.Start();
-            // _renderList.Add(ship);
-            for (int i = 1; i <= 300; i++)
+             _renderList.Add(ship);
+            for (int i = 1; i <= 500; i++)
             {
                 ship.Compute(box);
                 //Ship.Thrust = 3.42;
 
-                ship.Update(0.1);//0.25);
+                ship.Update(FixedDeltaTime);//0.25);
                 //if (playMode)
                 //    Console.WriteLine($"S:{i,-5}  X:{ship.Position.X,6:F1}  A:{ship.Position.Y,6:F1}  R:{ship.Rotation,6:F1}  Vx:{ship.Velocity.X,6:F1} Vy:{ship.Velocity.Y,6:F1} F:{ship.Fuel,6:F1}  T:{ship.Thrust,6:F1}");
                 FrmMain.Instance.picBox.Invalidate();
@@ -85,8 +85,8 @@ namespace SharpNeatLander
 
 
             }
-            //Lander dummy;
-            //_renderList.TryTake(out dummy);
+            Lander dummy;
+            _renderList.TryTake(out dummy);
             return ship.GetFitness();
         }
 
