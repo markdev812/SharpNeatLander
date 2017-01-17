@@ -60,7 +60,7 @@ namespace SharpNeatLander
             _experiment = new SimpleExperiment();
 
             //create the EA with simple defaults
-            _ea = _experiment.CreateSimpleEA("lander", NUM_INPUTS, NUM_OUTPUTS, GetFitness);
+            _ea = _experiment.CreateSimpleEA("lander", NUM_INPUTS, NUM_OUTPUTS, Evaluate);
 
             _ea.UpdateEvent += ea_UpdateEvent;
 
@@ -69,39 +69,21 @@ namespace SharpNeatLander
         }
 
 
-        public static double GetFitness(IBlackBox box)
+        public static double Evaluate(IBlackBox box)
         {
+            World w = new World();
+
             double fitness = 0;
-            Lander ship = new Lander();
-            ship.Start();
 
-            _renderList.Add(ship);  //render to screen
-
-            int updateCount = 0;
-            while (!ship.Finished)
+            for (int i = 0; i < 10; i++)
             {
-                updateCount++;
-
-                ship.Compute(box);
-                //Ship.Thrust = 3.42;
-
-                ship.Update(FixedDeltaTime);//0.25);
-                                            //if (playMode)
-                                            //    Console.WriteLine($"S:{i,-5}  X:{ship.Position.X,6:F1}  A:{ship.Position.Y,6:F1}  R:{ship.Rotation,6:F1}  Vx:{ship.Velocity.X,6:F1} Vy:{ship.Velocity.Y,6:F1} F:{ship.Fuel,6:F1}  T:{ship.Thrust,6:F1}");
-                double f = ship.GetFitness();
+                double f = w.RunTrial(box);
                 if (f > fitness)
                     fitness = f;
-                FrmMain.Instance.picBox.Invalidate();
-                if (ship.Finished)
-                    break;
-
 
             }
-            //remove from render list
-            Lander dummy;
-            _renderList.TryTake(out dummy);
 
-            return fitness;// / updateCount;
+            return fitness;
         }
 
 
@@ -131,7 +113,7 @@ namespace SharpNeatLander
         void RunBest()
         {
             _experiment = new SimpleExperiment();
-            _ea = _experiment.CreateSimpleEA("lander", NUM_INPUTS, NUM_OUTPUTS, GetFitness);
+            _ea = _experiment.CreateSimpleEA("lander", NUM_INPUTS, NUM_OUTPUTS, Evaluate);
 
             IBlackBox bestLander = _experiment.GetChamp();
             Lander ship = new Lander();
@@ -154,7 +136,7 @@ namespace SharpNeatLander
 
                 Debug.WriteLine($"S:{FixedDeltaTime,-5:F2}  X:{ship.Position.X,6:F1}  A:{ship.Position.Y,6:F1}  R:{ship.Rotation,6:F1}  Vx:{ship.Velocity.X,6:F1} Vy:{ship.Velocity.Y,6:F1} F:{ship.Fuel,6:F1}  T:{ship.Thrust,6:F1}");
 
-                if (ship.Finished)
+                if (ship.Crashed || ship.Landed)
                     _running = false;
 
                 Thread.Sleep((int)(FixedDeltaTime * 1000.0));

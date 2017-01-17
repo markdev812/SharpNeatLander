@@ -41,7 +41,8 @@ namespace SharpNeatLander
         public double Thrust { get; private set; }
 
 
-        public bool Finished => (Vector2.Distance(TargetPos, Position) < 5) || (OutOfFuel) || WentOutOfBounds;// || HadCollision;
+        public bool Crashed => OutOfFuel || WentOutOfBounds || HadCollision;
+        public bool Landed => (Vector2.Distance(TargetPos, Position) < 5) && !OutOfFuel && !WentOutOfBounds && !HadCollision;
 
 
         public void Start()
@@ -192,12 +193,11 @@ namespace SharpNeatLander
             //double x =  NormalizeFitness(Position.X, 0, ViewWidth, TargetPos.X, 10);
 
             //check out of bounds
-            if (WentOutOfBounds || OutOfFuel || HadCollision)
-                return 0;
+            
             double fitness = 0;
             //fitness += 1 - (Vector2.Distance(TargetPos, Position) / 2000);
             double td = Vector2.Distance(TargetPos, Position);
-            fitness += NormalizeFitness(td, 0, 2000, 0, 10);
+            fitness += NormalizeFitness(td, 0, 2000, 0, 1);
             // fitness -= _numCollisions * 0.002;
 
             //fitness += NormalizeFitness(Velocity.Magnitude, 0, 100, 20, 10);

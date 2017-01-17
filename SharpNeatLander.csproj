@@ -144,6 +144,7 @@
     <Compile Include="SimpleEvaluator.cs" />
     <Compile Include="SimpleExperiment.cs" />
     <Compile Include="Vector2.cs" />
+    <Compile Include="World.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
