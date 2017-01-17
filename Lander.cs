@@ -28,7 +28,7 @@ namespace SharpNeatLander
         public const double ObstacleRadius = 200;
 
         private bool HadCollision;
-        private int _numCollisions;
+        //private int _numCollisions;
         private bool WentOutOfBounds;
         private bool OutOfFuel;
 
@@ -78,10 +78,10 @@ namespace SharpNeatLander
 
             Position += Velocity * deltaTime;
 
-            //if (!HadCollision)
-            //    HadCollision = (Vector2.Distance(Position, ObstaclePos) <= ObstacleRadius);
-            if ((Vector2.Distance(Position, ObstaclePos) <= ObstacleRadius))
-                _numCollisions++;
+            if (!HadCollision)
+                HadCollision = (Vector2.Distance(Position, ObstaclePos) <= ObstacleRadius);
+            //if ((Vector2.Distance(Position, ObstaclePos) <= ObstacleRadius))
+            //    _numCollisions++;
 
             if (!WentOutOfBounds)
                 WentOutOfBounds = (Position.X < 0 || Position.X > ViewWidth || Position.Y < 0);
@@ -97,13 +97,13 @@ namespace SharpNeatLander
             ISignalArray outputArr = box.OutputSignalArray;
 
             //set inputs
-            inputArr[0] = Position.X / ViewWidth;
-            inputArr[1] = Position.Y / StartPos.Y;
-            inputArr[2] = Velocity.X / TerminalVel;
-            inputArr[3] = Velocity.Y / TerminalVel;
-            inputArr[4] = Fuel / StartingFuel;
-            inputArr[5] = Vector2.Distance(Position, TargetPos) / ViewWidth;
-            inputArr[6] = Vector2.Distance(Position, ObstaclePos) / ViewWidth;
+            //inputArr[0] = Position.X / ViewWidth;
+            //inputArr[1] = Position.Y / StartPos.Y;
+            //inputArr[2] = Velocity.X / TerminalVel;
+            //inputArr[3] = Velocity.Y / TerminalVel;
+            //inputArr[4] = Fuel / StartingFuel;
+            inputArr[0] = Vector2.Distance(Position, TargetPos) / ViewWidth;
+            inputArr[1] = Vector2.Distance(Position, ObstaclePos) / ViewWidth;
 
 
             box.Activate();
@@ -192,18 +192,19 @@ namespace SharpNeatLander
             //double x =  NormalizeFitness(Position.X, 0, ViewWidth, TargetPos.X, 10);
 
             //check out of bounds
-            //if (WentOutOfBounds || OutOfFuel)
-            //   return 0;
+            if (WentOutOfBounds || OutOfFuel || HadCollision)
+                return 0;
             double fitness = 0;
+            //fitness += 1 - (Vector2.Distance(TargetPos, Position) / 2000);
             double td = Vector2.Distance(TargetPos, Position);
-            fitness += NormalizeFitness(td, 0, 1500, 0, 2);
-           // fitness -= _numCollisions * 0.002;
+            fitness += NormalizeFitness(td, 0, 2000, 0, 10);
+            // fitness -= _numCollisions * 0.002;
 
             //fitness += NormalizeFitness(Velocity.Magnitude, 0, 100, 20, 10);
             //fitness += NormalizeFitness(Fuel, 0, StartingFuel, StartingFuel, 10);
             ;
-           // double od = (ObstaclePos.Y - Position.Y); // Vector2.Distance(Position, ObstaclePos);
-            //fitness += (od /ObstacleRadius) * 4;
+            //double od = Vector2.Distance(Position, ObstaclePos);
+            //fitness += NormalizeFitness(od, 0, 2000, ObstacleRadius + 50, 8);
 
 
             // double fitness = f + vx + vy + x + r;
