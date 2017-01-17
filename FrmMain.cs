@@ -57,7 +57,7 @@ namespace SharpNeatLander
             _experiment = new SimpleExperiment();
 
             //create the EA with simple defaults
-            _ea = _experiment.CreateSimpleEA("lander", 5, 2, GetFitness);
+            _ea = _experiment.CreateSimpleEA("lander", 7, 2, GetFitness);
 
             _ea.UpdateEvent += ea_UpdateEvent;
 
@@ -117,7 +117,7 @@ namespace SharpNeatLander
         void RunBest()
         {
             _experiment = new SimpleExperiment();
-            _ea = _experiment.CreateSimpleEA("lander", 5, 2, GetFitness);
+            _ea = _experiment.CreateSimpleEA("lander", 7, 2, GetFitness);
 
             IBlackBox bestLander = _experiment.GetChamp();
             Lander ship = new Lander();
