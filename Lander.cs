@@ -4,7 +4,7 @@ using System.Drawing;
 
 namespace SharpNeatLander
 {
-    public class Lander
+    public class Lander : INeatUnit
     {
         //public const double StartingAltitude = 2400;
         public const double ViewWidth = 1000;
@@ -44,6 +44,7 @@ namespace SharpNeatLander
         public bool Crashed => OutOfFuel || WentOutOfBounds || HadCollision;
         public bool Landed => (Vector2.Distance(TargetPos, Position) < 5) && !OutOfFuel && !WentOutOfBounds && !HadCollision;
 
+        
 
         public void Start()
         {

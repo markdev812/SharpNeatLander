@@ -75,6 +75,7 @@ namespace SharpNeatLander
 
             double fitness = 0;
 
+            //run the trial several times and keep the best fitness
             for (int i = 0; i < 10; i++)
             {
                 double f = w.RunTrial(box);
