@@ -53,15 +53,15 @@ namespace UnitTests
         [TestMethod]
         public void NormalizeFitnessTest()
         {
-            Assert.IsTrue(Lander.NormalizeFitness(0, 0, 1000, 500, 200).AlmostEquals(100));
-            Assert.IsTrue(Lander.NormalizeFitness(1000, 0, 1000, 500, 200).AlmostEquals(100));
-            Assert.IsTrue(Lander.NormalizeFitness(500, 0, 1000, 500, 200).AlmostEquals(200));
+            Assert.IsTrue(LanderUnit.NormalizeFitness(0, 0, 1000, 500, 200).AlmostEquals(100));
+            Assert.IsTrue(LanderUnit.NormalizeFitness(1000, 0, 1000, 500, 200).AlmostEquals(100));
+            Assert.IsTrue(LanderUnit.NormalizeFitness(500, 0, 1000, 500, 200).AlmostEquals(200));
         }
         [TestMethod]
         public void CalcFitnessTest()
         {
-            Assert.IsTrue(Lander.CalcFitness(50, 100, 200).AlmostEquals(100));
-            Assert.IsTrue(Lander.CalcFitness(50, -100, 200).AlmostEquals(100));
+            Assert.IsTrue(LanderUnit.CalcFitness(50, 100, 200).AlmostEquals(100));
+            Assert.IsTrue(LanderUnit.CalcFitness(50, -100, 200).AlmostEquals(100));
 
 
         }

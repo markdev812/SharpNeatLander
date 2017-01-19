@@ -4,10 +4,11 @@ using System.Drawing;
 
 namespace SharpNeatLander
 {
-    public class Lander : INeatUnit
+    public class LanderUnit : INeatUnit
     {
+        
+        
         //public const double StartingAltitude = 2400;
-        public const double ViewWidth = 1000;
         public const double StartingFuel = 1000;
         public const double MaxThrust = 6;
 
@@ -44,10 +45,13 @@ namespace SharpNeatLander
         public bool Crashed => OutOfFuel || WentOutOfBounds || HadCollision;
         public bool Landed => (Vector2.Distance(TargetPos, Position) < 5) && !OutOfFuel && !WentOutOfBounds && !HadCollision;
 
-        
 
-        public void Start()
+        private INeatWorld _world;
+
+        public void Start(INeatWorld world)
         {
+            _world = world;
+
             Position = StartPos;
             Fuel = StartingFuel;
             Rotation = 90; //up
@@ -86,7 +90,7 @@ namespace SharpNeatLander
             //    _numCollisions++;
 
             if (!WentOutOfBounds)
-                WentOutOfBounds = (Position.X < 0 || Position.X > ViewWidth || Position.Y < 0);
+                WentOutOfBounds = (Position.X < 0 || Position.X > _world.ViewWidth || Position.Y < 0);
 
             //if (Position.Y < 0)
             //    Position.Y = 0;
@@ -104,8 +108,8 @@ namespace SharpNeatLander
             //inputArr[2] = Velocity.X / TerminalVel;
             //inputArr[3] = Velocity.Y / TerminalVel;
             //inputArr[4] = Fuel / StartingFuel;
-            inputArr[0] = Vector2.Distance(Position, TargetPos) / ViewWidth;
-            inputArr[1] = Vector2.Distance(Position, ObstaclePos) / ViewWidth;
+            inputArr[0] = Vector2.Distance(Position, TargetPos) / _world.ViewWidth;
+            inputArr[1] = Vector2.Distance(Position, ObstaclePos) / _world.ViewWidth;
 
 
             box.Activate();
@@ -256,10 +260,10 @@ namespace SharpNeatLander
 
             Point[] lines = new Point[4]
             {
-                FrmMain.Instance.WorldToView(new Vector2(Position.X,Position.Y + 50)),
-                FrmMain.Instance.WorldToView(new Vector2(Position.X -20,Position.Y)),
-                FrmMain.Instance.WorldToView(new Vector2(Position.X+20,Position.Y )),
-                FrmMain.Instance.WorldToView(new Vector2(Position.X,Position.Y + 50 )),
+                _world.WorldToView(new Vector2(Position.X,Position.Y + 50)),
+                _world.WorldToView(new Vector2(Position.X -20,Position.Y)),
+                _world.WorldToView(new Vector2(Position.X+20,Position.Y )),
+                _world.WorldToView(new Vector2(Position.X,Position.Y + 50 )),
 
             };
             g.DrawLines(new Pen(Color.White, 2), lines);
@@ -267,23 +271,23 @@ namespace SharpNeatLander
             Vector2 rot = Vector2.FromAngle(Rotation) * Thrust * 10;
             Point[] rotLines = new Point[2]
            {
-                FrmMain.Instance.WorldToView(new Vector2(Position.X,Position.Y)),
-                FrmMain.Instance.WorldToView(new Vector2(Position.X - rot.X,Position.Y-rot.Y)),
+                _world.WorldToView(new Vector2(Position.X,Position.Y)),
+                _world.WorldToView(new Vector2(Position.X - rot.X,Position.Y-rot.Y)),
 
            };
 
             //draw a thrust line
             g.DrawLines(new Pen(Color.Gold, 2), rotLines);
 
-            Point start = FrmMain.Instance.WorldToView(StartPos);
-            Point targ = FrmMain.Instance.WorldToView(TargetPos);
+            Point start = _world.WorldToView(StartPos);
+            Point targ = _world.WorldToView(TargetPos);
 
             g.DrawRectangle(new Pen(Color.White), new Rectangle(start.X - 10, start.Y, 20, 5));
             g.DrawRectangle(new Pen(Color.White), new Rectangle(targ.X - 10, targ.Y, 20, 5));
 
             //draw the obstacle
-            Point obsPoint = FrmMain.Instance.WorldToView(ObstaclePos);
-            int obsRadius = (int)(ObstacleRadius * FrmMain.ViewScale);
+            Point obsPoint = _world.WorldToView(ObstaclePos);
+            int obsRadius = (int)(ObstacleRadius * _world.ViewScale);
             g.DrawEllipse(new Pen(Color.Red), new Rectangle(obsPoint.X - obsRadius, obsPoint.Y - obsRadius, obsRadius * 2, obsRadius * 2));
 
         }

@@ -3,9 +3,9 @@ using System.Drawing;
 
 namespace SharpNeatLander
 {
-    interface INeatUnit
+    public interface INeatUnit
     {
-        void Start();
+        void Start(INeatWorld world);
         void Update(double deltaTime);
         void Compute(IBlackBox box);
         double GetFitness();
