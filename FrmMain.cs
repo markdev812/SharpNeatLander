@@ -8,6 +8,9 @@ namespace SharpNeatLander
 
     public partial class FrmMain : Form
     {
+        public double ViewScale => 0.6;
+        public int ViewHeight => picBox.Height;
+        public int ViewWidth => picBox.Width;
 
 
         private Button btnStopEA;
@@ -37,6 +40,12 @@ namespace SharpNeatLander
             {
                 obj.Render(g);
             }
+        }
+        public Point WorldToView(Vector2 pos)
+        {
+
+            return new Point((int)Math.Round(pos.X * ViewScale), ViewHeight - (int)Math.Round(pos.Y * ViewScale));
+
         }
 
         public void UpdateView()

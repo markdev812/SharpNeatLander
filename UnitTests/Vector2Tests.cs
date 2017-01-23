@@ -81,7 +81,7 @@ namespace UnitTests
             Assert.IsTrue(d.AlmostEquals(1.414213562373095));
             d = Vector2.Distance(new Vector2(-1, -1), new Vector2(-2, -2));
             Assert.IsTrue(d.AlmostEquals(1.414213562373095));
-            d = Vector2.Distance(new Vector2(-1, -1), new Vector2(1, 1));
+            d = Vector2.Distance(new Vector2(-1, 1), new Vector2(1, -1));
             Assert.IsTrue(d.AlmostEquals(2.82842712474619));
         }
         [TestMethod]

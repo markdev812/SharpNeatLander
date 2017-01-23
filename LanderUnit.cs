@@ -6,8 +6,8 @@ namespace SharpNeatLander
 {
     public class LanderUnit : INeatUnit
     {
-        
-        
+
+
         //public const double StartingAltitude = 2400;
         public const double StartingFuel = 1000;
         public const double MaxThrust = 6;
@@ -23,10 +23,11 @@ namespace SharpNeatLander
         public const double TerminalVel = -200;
         public const double CrashSpeed = -20;
 
-        public readonly Vector2 StartPos = new Vector2(100, 100);
+        public readonly Vector2 StartPos = new Vector2(100, 300);
         public readonly Vector2 TargetPos = new Vector2(900, 150);
-        public readonly Vector2 ObstaclePos = new Vector2(500, 50);
+        public readonly Vector2 ObstaclePos = new Vector2(500, 250);
         public const double ObstacleRadius = 200;
+        public double StartDistToTarget;
 
         private bool HadCollision;
         //private int _numCollisions;
@@ -53,6 +54,7 @@ namespace SharpNeatLander
             _world = world;
 
             Position = StartPos;
+            StartDistToTarget = Vector2.Distance(StartPos, TargetPos);
             Fuel = StartingFuel;
             Rotation = 90; //up
 
@@ -85,12 +87,12 @@ namespace SharpNeatLander
             Position += Velocity * deltaTime;
 
             if (!HadCollision)
-                HadCollision = (Vector2.Distance(Position, ObstaclePos) <= ObstacleRadius);
+                HadCollision = (Vector2.Distance(Position, ObstaclePos) <= ObstacleRadius+20);
             //if ((Vector2.Distance(Position, ObstaclePos) <= ObstacleRadius))
             //    _numCollisions++;
 
             if (!WentOutOfBounds)
-                WentOutOfBounds = (Position.X < 0 || Position.X > _world.ViewWidth || Position.Y < 0);
+                WentOutOfBounds = (Position.X < 0 || Position.X > _world.Width || Position.Y < 0 || Position.Y > _world.Height);
 
             //if (Position.Y < 0)
             //    Position.Y = 0;
@@ -108,8 +110,11 @@ namespace SharpNeatLander
             //inputArr[2] = Velocity.X / TerminalVel;
             //inputArr[3] = Velocity.Y / TerminalVel;
             //inputArr[4] = Fuel / StartingFuel;
-            inputArr[0] = Vector2.Distance(Position, TargetPos) / _world.ViewWidth;
-            inputArr[1] = Vector2.Distance(Position, ObstaclePos) / _world.ViewWidth;
+            inputArr[0] = Vector2.Distance(Position, TargetPos);
+            inputArr[1] = Vector2.Distance(Position, ObstaclePos);
+            inputArr[2] = Velocity.X;
+            inputArr[3] = Velocity.Y;
+
 
 
             box.Activate();
@@ -198,18 +203,18 @@ namespace SharpNeatLander
             //double x =  NormalizeFitness(Position.X, 0, ViewWidth, TargetPos.X, 10);
 
             //check out of bounds
-            
+
             double fitness = 0;
             //fitness += 1 - (Vector2.Distance(TargetPos, Position) / 2000);
             double td = Vector2.Distance(TargetPos, Position);
-            fitness += NormalizeFitness(td, 0, 2000, 0, 1);
+            fitness += NormalizeFitness(td, 0, StartDistToTarget, 0, 2);
             // fitness -= _numCollisions * 0.002;
 
             //fitness += NormalizeFitness(Velocity.Magnitude, 0, 100, 20, 10);
-            //fitness += NormalizeFitness(Fuel, 0, StartingFuel, StartingFuel, 10);
+            //fitness -= NormalizeFitness(Fuel, 0, StartingFuel, 0, 1);
             ;
-            //double od = Vector2.Distance(Position, ObstaclePos);
-            //fitness += NormalizeFitness(od, 0, 2000, ObstacleRadius + 50, 8);
+            double od = Vector2.Distance(Position, ObstaclePos);
+            fitness += NormalizeFitness(od, 0, 100, 100, 1);
 
 
             // double fitness = f + vx + vy + x + r;
@@ -260,10 +265,10 @@ namespace SharpNeatLander
 
             Point[] lines = new Point[4]
             {
-                _world.WorldToView(new Vector2(Position.X,Position.Y + 50)),
-                _world.WorldToView(new Vector2(Position.X -20,Position.Y)),
-                _world.WorldToView(new Vector2(Position.X+20,Position.Y )),
-                _world.WorldToView(new Vector2(Position.X,Position.Y + 50 )),
+                FrmMain.Instance.WorldToView(new Vector2(Position.X,Position.Y + 50)),
+                FrmMain.Instance.WorldToView(new Vector2(Position.X -20,Position.Y)),
+                FrmMain.Instance.WorldToView(new Vector2(Position.X+20,Position.Y )),
+                FrmMain.Instance.WorldToView(new Vector2(Position.X,Position.Y + 50 )),
 
             };
             g.DrawLines(new Pen(Color.White, 2), lines);
@@ -271,23 +276,23 @@ namespace SharpNeatLander
             Vector2 rot = Vector2.FromAngle(Rotation) * Thrust * 10;
             Point[] rotLines = new Point[2]
            {
-                _world.WorldToView(new Vector2(Position.X,Position.Y)),
-                _world.WorldToView(new Vector2(Position.X - rot.X,Position.Y-rot.Y)),
+                FrmMain.Instance.WorldToView(new Vector2(Position.X,Position.Y)),
+                FrmMain.Instance.WorldToView(new Vector2(Position.X - rot.X,Position.Y-rot.Y)),
 
            };
 
             //draw a thrust line
             g.DrawLines(new Pen(Color.Gold, 2), rotLines);
 
-            Point start = _world.WorldToView(StartPos);
-            Point targ = _world.WorldToView(TargetPos);
+            Point start = FrmMain.Instance.WorldToView(StartPos);
+            Point targ = FrmMain.Instance.WorldToView(TargetPos);
 
             g.DrawRectangle(new Pen(Color.White), new Rectangle(start.X - 10, start.Y, 20, 5));
             g.DrawRectangle(new Pen(Color.White), new Rectangle(targ.X - 10, targ.Y, 20, 5));
 
             //draw the obstacle
-            Point obsPoint = _world.WorldToView(ObstaclePos);
-            int obsRadius = (int)(ObstacleRadius * _world.ViewScale);
+            Point obsPoint = FrmMain.Instance.WorldToView(ObstaclePos);
+            int obsRadius = (int)(ObstacleRadius * FrmMain.Instance.ViewScale);
             g.DrawEllipse(new Pen(Color.Red), new Rectangle(obsPoint.X - obsRadius, obsPoint.Y - obsRadius, obsRadius * 2, obsRadius * 2));
 
         }

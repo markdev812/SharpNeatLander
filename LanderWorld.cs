@@ -4,7 +4,6 @@ using SharpNeat.Genomes.Neat;
 using SharpNeat.Phenomes;
 using System;
 using System.Diagnostics;
-using System.Drawing;
 using System.Threading;
 
 namespace SharpNeatLander
@@ -12,15 +11,15 @@ namespace SharpNeatLander
     public class LanderWorld : INeatWorld
     {
         public double FixedDeltaTime => 0.1;
-        public double ViewScale => 0.6;
-        public int ViewHeight => 1000;
-        public int ViewWidth => 1000;
+
 
         public const string NAME = "lander";
-        public const int NUM_INPUTS = 2;
+        public const int NUM_INPUTS = 4;
         public const int NUM_OUTPUTS = 2;
 
 
+        public double Width => 1000.0;
+        public double Height => 1000.0;
 
         private static SimpleExperiment _experiment;
         static NeatEvolutionAlgorithm<NeatGenome> _ea;
@@ -28,12 +27,7 @@ namespace SharpNeatLander
         private Thread _runBestThread;
         private bool _running;
 
-        public Point WorldToView(Vector2 pos)
-        {
 
-            return new Point((int)Math.Round(pos.X * ViewScale), ViewHeight - (int)Math.Round(pos.Y * ViewScale));
-
-        }
 
         public void StartLearning()
         {
@@ -78,7 +72,7 @@ namespace SharpNeatLander
                     fitness = f;
 
             }
-
+            //Console.WriteLine($"Eval best: {fitness}");
             return fitness;
         }
         /// <summary>
@@ -92,7 +86,8 @@ namespace SharpNeatLander
             ship.Start(this);
 
             //run simulation for a few frames
-            for (int i = 0; i < 500; i++)
+            int i = 0;
+            for (i = 0; i < 200; i++)
             {
 
                 ship.Compute(box);
@@ -101,12 +96,13 @@ namespace SharpNeatLander
                 ship.Update(FixedDeltaTime); //0.25);
 
                 //    Console.WriteLine($"S:{i,-5}  X:{ship.Position.X,6:F1}  A:{ship.Position.Y,6:F1}  R:{ship.Rotation,6:F1}  Vx:{ship.Velocity.X,6:F1} Vy:{ship.Velocity.Y,6:F1} F:{ship.Fuel,6:F1}  T:{ship.Thrust,6:F1}");
-
+                
                 if (ship.Landed || ship.Crashed)
                     break;
 
 
             }
+            //Console.WriteLine($"Frames: {i}");
             return ship.GetFitness();
         }
         public void StartRunning()

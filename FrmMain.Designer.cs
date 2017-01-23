@@ -51,6 +51,7 @@ namespace SharpNeatLander
             this.picBox.Size = new System.Drawing.Size(849, 551);
             this.picBox.TabIndex = 0;
             this.picBox.TabStop = false;
+            this.picBox.Paint += new System.Windows.Forms.PaintEventHandler(this.picBox1_Paint);
             // 
             // btnLearn
             // 

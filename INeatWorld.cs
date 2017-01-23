@@ -1,15 +1,13 @@
 ﻿using SharpNeat.Phenomes;
-using System.Drawing;
 
 namespace SharpNeatLander
 {
     public interface INeatWorld
     {
         double FixedDeltaTime { get; }
-        double ViewScale { get; }
-        int ViewWidth { get; }
-        int ViewHeight { get; }
-        Point WorldToView(Vector2 pos);
+
+        double Width { get; }
+        double Height { get; }
 
         void StartLearning();
         void StopLearning();
