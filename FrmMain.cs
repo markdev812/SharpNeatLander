@@ -17,7 +17,6 @@ namespace SharpNeatLander
         private Button btnStopRunning;
 
 
-        public static readonly ConcurrentBag<LanderUnit> RenderList = new ConcurrentBag<LanderUnit>();
         public static FrmMain Instance = null;
 
         LanderWorld _world = new LanderWorld();
@@ -36,7 +35,7 @@ namespace SharpNeatLander
         private void picBox1_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            foreach (var obj in RenderList)
+            foreach (var obj in _world.RenderList)
             {
                 obj.Render(g);
             }

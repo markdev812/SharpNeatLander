@@ -3,6 +3,7 @@ using SharpNeat.EvolutionAlgorithms;
 using SharpNeat.Genomes.Neat;
 using SharpNeat.Phenomes;
 using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
 
@@ -17,6 +18,7 @@ namespace SharpNeatLander
         public const int NUM_INPUTS = 4;
         public const int NUM_OUTPUTS = 2;
 
+        public readonly ConcurrentBag<LanderUnit> RenderList = new ConcurrentBag<LanderUnit>();
 
         public double Width => 1000.0;
         public double Height => 1000.0;
@@ -131,7 +133,7 @@ namespace SharpNeatLander
             sw.Start();
             //add obj to render list
             //
-            FrmMain.RenderList.Add(ship);
+            RenderList.Add(ship);
 
             while (_running)
             {
@@ -149,7 +151,7 @@ namespace SharpNeatLander
                 Thread.Sleep((int)(FixedDeltaTime * 1000.0));
             }
             LanderUnit dummy;
-            FrmMain.RenderList.TryTake(out dummy);
+            RenderList.TryTake(out dummy);
         }
 
     }
