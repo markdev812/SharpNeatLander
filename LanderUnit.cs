@@ -1,10 +1,11 @@
 ﻿using SharpNeat.Phenomes;
 using System;
+using System.Diagnostics;
 using System.Drawing;
 
 namespace SharpNeatLander
 {
-    public class LanderUnit : INeatUnit
+    public class LanderUnit : NeatUnit
     {
 
 
@@ -47,9 +48,9 @@ namespace SharpNeatLander
         public bool Landed => (Vector2.Distance(TargetPos, Position) < 5) && !OutOfFuel && !WentOutOfBounds && !HadCollision;
 
 
-        private INeatWorld _world;
+        private NeatWorld _world;
 
-        public void Start(INeatWorld world)
+        public override void Start(NeatWorld world)
         {
             _world = world;
 
@@ -60,7 +61,7 @@ namespace SharpNeatLander
 
             //CalcFitness(40, 0, 200, 20, 100);
         }
-        public void Update(double deltaTime)
+        public override bool Update(double deltaTime)
         {
             if (Fuel <= 0.01)
             {
@@ -87,7 +88,7 @@ namespace SharpNeatLander
             Position += Velocity * deltaTime;
 
             if (!HadCollision)
-                HadCollision = (Vector2.Distance(Position, ObstaclePos) <= ObstacleRadius+20);
+                HadCollision = (Vector2.Distance(Position, ObstaclePos) <= ObstacleRadius + 20);
             //if ((Vector2.Distance(Position, ObstaclePos) <= ObstacleRadius))
             //    _numCollisions++;
 
@@ -97,9 +98,20 @@ namespace SharpNeatLander
             //if (Position.Y < 0)
             //    Position.Y = 0;
 
+
+
+            //return true if we are done
+            return Landed || Crashed;
+
         }
 
-        public void Compute(IBlackBox box)
+        public override void PrintStats()
+        {
+            Debug.WriteLine($"X:{Position.X,6:F1}  A:{Position.Y,6:F1}  R:{Rotation,6:F1}  Vx:{Velocity.X,6:F1} Vy:{Velocity.Y,6:F1} F:{Fuel,6:F1}  T:{Thrust,6:F1}");
+
+        }
+
+        public override void Compute(IBlackBox box)
         {
             ISignalArray inputArr = box.InputSignalArray;
             ISignalArray outputArr = box.OutputSignalArray;
@@ -192,7 +204,7 @@ namespace SharpNeatLander
             return r * weight;
         }
 
-        public double GetFitness()
+        public override double GetFitness()
         {
 
 
@@ -258,7 +270,7 @@ namespace SharpNeatLander
         }
 
 
-        public void Render(Graphics g)
+        public override void Render(Graphics g)
         {
             //draw a triangle to represent lander for now
 

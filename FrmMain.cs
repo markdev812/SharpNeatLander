@@ -19,7 +19,7 @@ namespace SharpNeatLander
 
         public static FrmMain Instance = null;
 
-        LanderWorld _world = new LanderWorld();
+        private NeatWorld _world;
 
         public FrmMain()
         {
@@ -28,7 +28,11 @@ namespace SharpNeatLander
 
         private void FrmMain_Load(object sender, System.EventArgs e)
         {
+            
             Instance = this;
+
+            _world = NeatWorld.CreateWorld("lander", 4, 2);
+
             picBox.Paint += new PaintEventHandler(this.picBox1_Paint);
         }
 

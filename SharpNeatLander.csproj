@@ -137,9 +137,9 @@
     <Compile Include="FrmMain.Designer.cs">
       <DependentUpon>FrmMain.cs</DependentUpon>
     </Compile>
-    <Compile Include="INeatUnit.cs" />
-    <Compile Include="INeatWorld.cs" />
+    <Compile Include="NeatUnit.cs" />
     <Compile Include="LanderUnit.cs" />
+    <Compile Include="NeatWorld.cs" />
     <Compile Include="Mathf.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
