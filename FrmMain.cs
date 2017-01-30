@@ -30,13 +30,13 @@ namespace SharpNeatLander
 
             Instance = this;
 
-            // _world = new NeatWorld("lander", 4, 2);
-            _world = new NeatWorld("tictactoe", 9, 1);
+             _world = NeatWorld.Create("lander");
+            //_world = new NeatWorld("tictactoe", 9, 1);
 
-            picBox.Paint += new PaintEventHandler(this.picBox1_Paint);
+            picBox.Paint += picBox1_Paint;
         }
 
-        private void picBox1_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
+        private void picBox1_Paint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
             foreach (var obj in _world.RenderList)
@@ -55,7 +55,7 @@ namespace SharpNeatLander
         {
             picBox.Invalidate();
         }
-        private void btnLearn_Click(object sender, System.EventArgs e)
+        private void btnLearn_Click(object sender, EventArgs e)
         {
             _world.StartLearning();
         }

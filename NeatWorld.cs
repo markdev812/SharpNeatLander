@@ -4,6 +4,7 @@ using SharpNeat.Genomes.Neat;
 using SharpNeat.Phenomes;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 
@@ -24,8 +25,10 @@ namespace SharpNeatLander
 
 
 
-        private static SimpleExperiment _experiment;
-        public NeatEvolutionAlgorithm<NeatGenome> _ea;
+        protected static SimpleExperiment _experiment;
+        protected NeatEvolutionAlgorithm<NeatGenome> _ea;
+
+        private static Dictionary<IBlackBox, NeatWorld> _boxWorldMap = new Dictionary<IBlackBox, NeatWorld>();
 
         private Thread _runBestThread;
         private bool _running;
@@ -37,22 +40,32 @@ namespace SharpNeatLander
             NumOutputs = numOutputs;
 
         }
-        public static double Evaluate(IBlackBox box)
+
+        public static NeatWorld Create(string name)
         {
-            NeatWorld w = new NeatWorld(Name, NumInputs, NumOutputs);
+            if (name == "lander") return new SimWorld("lander", 4, 2);
+            //if (name == "tictactoe") return new TurnBasedWorld("tictactoe", 9, 1);
 
-            double fitness = 0;
+            return null;
 
-            //run the trial several times and keep the best fitness
-            for (int i = 0; i < 10; i++)
+        }
+
+        public static double DoEvaluate(IBlackBox box)
+        {
+            NeatWorld w = null;
+            if (_boxWorldMap.ContainsKey(box))
             {
-                double f = w.RunTrial(box, 100);
-                if (f > fitness)
-                    fitness = f;
-
+                w = _boxWorldMap[box];
             }
-            //Console.WriteLine($"Eval best: {fitness}");
-            return fitness;
+            else
+            {
+                w = NeatWorld.Create(Name);
+            }
+
+            if (w != null)
+                return w.Evaluate(box);
+
+            return 0;
         }
 
         public void StartLearning()
@@ -61,7 +74,7 @@ namespace SharpNeatLander
             _experiment = new SimpleExperiment();
 
             //create the EA with simple defaults
-            _ea = _experiment.CreateSimpleEA(Name, NumInputs, NumOutputs, Evaluate);
+            _ea = _experiment.CreateSimpleEA(Name, NumInputs, NumOutputs, DoEvaluate);
 
             _ea.UpdateEvent += ea_UpdateEvent;
 
@@ -92,7 +105,7 @@ namespace SharpNeatLander
         public void StartRunning()
         {
             _running = false;
-            _runBestThread = new Thread(DoRunBest);
+            _runBestThread = new Thread(() => RunBest());
             _runBestThread.Start();
         }
 
@@ -101,75 +114,41 @@ namespace SharpNeatLander
             _running = false;
         }
 
-        /// <summary>
-        /// Instantiate one unit and run it through a few updates.
-        /// </summary>
-        /// <param name="box">The phenome to run against</param>
-        /// <param name="maxFrames">Maximum number of update iterations</param>
-        /// <returns>The units fitness (0-1)</returns>
-        public double RunTrial(IBlackBox box, int maxFrames)
-        {
-            NeatUnit unit = NeatUnit.Create(Name);
-            unit.Start(this);
-
-            //run simulation for a few frames
-            int i = 0;
-            for (i = 0; i < maxFrames; i++)
-            {
-
-                unit.Compute(box);
-
-
-                bool done = unit.Update(FixedDeltaTime); //0.25);
-
-                //    Console.WriteLine($"S:{i,-5}  X:{ship.Position.X,6:F1}  A:{ship.Position.Y,6:F1}  R:{ship.Rotation,6:F1}  Vx:{ship.Velocity.X,6:F1} Vy:{ship.Velocity.Y,6:F1} F:{ship.Fuel,6:F1}  T:{ship.Thrust,6:F1}");
-
-                if (done)
-                    break;
-
-
-            }
-            //Console.WriteLine($"Frames: {i}");
-            return unit.GetFitness();
-        }
-
-
-        public void DoRunBest()
+        public void RunBest()
         {
             _experiment = new SimpleExperiment();
-            _ea = _experiment.CreateSimpleEA(Name, NumInputs, NumOutputs, Evaluate);
+            _experiment.CreateSimpleEA(Name, NumInputs, NumOutputs, null);
 
-            IBlackBox champ = _experiment.GetChamp();
+            IBlackBox box = _experiment.GetChamp();
 
-            NeatUnit unit = NeatUnit.Create(Name);
-            unit.Start(this);
+            Run(box);
 
-            _running = true;
-
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-            //add obj to render list
-            //
-            RenderList.Add(unit);
-
-            while (_running)
-            {
-                unit.Compute(champ);
-
-
-                bool done = unit.Update(FixedDeltaTime);
-                unit.PrintStats();
-
-                if (done)
-                    _running = false;
-
-                FrmMain.Instance.UpdateView();
-
-                Thread.Sleep((int)(FixedDeltaTime * 1000.0));
-            }
-            NeatUnit dummy;
-            RenderList.TryTake(out dummy);
         }
+
+        public virtual double Evaluate(IBlackBox box)
+        {
+            throw new NotImplementedException();
+
+        }
+        ///// <summary>
+        ///// Instantiate one unit and run it through a few updates.
+        ///// </summary>
+        ///// <param name="box">The phenome to run against</param>
+        ///// <param name="maxFrames">Maximum number of update iterations</param>
+        ///// <returns>The units fitness (0-1)</returns>
+        //public virtual double RunTrial(IBlackBox box, int maxFrames)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        public virtual void Run(IBlackBox box)
+        {
+
+            throw new NotImplementedException();
+        }
+
+
+
     }
 
 }
