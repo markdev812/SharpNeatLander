@@ -147,6 +147,7 @@
     <Compile Include="SimpleEvaluator.cs" />
     <Compile Include="SimpleExperiment.cs" />
     <Compile Include="TicTacToeUnit.cs" />
+    <Compile Include="TicTacToeWorld.cs" />
     <Compile Include="Vector2.cs" />
   </ItemGroup>
   <ItemGroup>

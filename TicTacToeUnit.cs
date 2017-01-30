@@ -8,52 +8,51 @@ namespace SharpNeatLander
     {
         private NeatWorld _world;
 
-        public int[] GB = null;                  //0 1 2
-                                                 //3 4 5
-                                                 //6 7 8
+        public static int[] GB = null;                  //0 1 2
+                                                        //3 4 5
+                                                        //6 7 8
 
-        //for now there is only one unit instance, we are always X player 
-        private int _playerType = 1;     //0=none,  1 = X,  2 = O
+
+        private static bool first = true;
+        public int PlayerType { get; set; }     //0=none,  1 = X,  2 = O
+
         private int _desiredMove;
         private int xwins, owins = 0;
+
 
         public override void Start(NeatWorld world)
         {
             _world = world;
             GB = new int[9];
+
+            if (first)
+            {
+                PlayerType = 1;
+            }
+            else
+            {
+                PlayerType = 2;
+            }
+            first = false;
         }
 
 
         public override bool Update(double deltaTime)
         {
-            int winner = 0;
-            //right now, this one unit instance plays both X and O
+
+            //update will make one move for this player
+
 
             //perform our move (X)
             if (IsLegalMove(_desiredMove))
             {
 
-                GB[_desiredMove] = _playerType;
+                GB[_desiredMove] = PlayerType;
 
-                //perform random move for (O)
-                for (int i = 0; i < 100; i++)
-                {
 
-                    int oMove = Mathf.RandomRange(0, 9);
-                    if (IsLegalMove(oMove))
-                    {
-                        GB[oMove] = 2;
-                        break;
-                    }
-                }
 
-                winner = GetWinner();
-                if (winner == 1)
-                    xwins++;
-                if (winner == 2)
-                    owins++;
             }
-            return winner == 1;
+            return GetWinner() == PlayerType;
         }
         public override void PrintStats()
         {
@@ -84,7 +83,7 @@ namespace SharpNeatLander
 
         private bool IsLegalMove(int index)
         {
-            return GB[index] == 0;
+            return GB[index] == 0; //unoccupied?
         }
 
         private int Sq(int v)
@@ -127,7 +126,7 @@ namespace SharpNeatLander
         }
         public override double GetFitness()
         {
-            return GetWinner() == _playerType ? 1.0 : 0;
+            return GetWinner() == PlayerType ? 1.0 : 0;
         }
 
         public override void Render(Graphics g)
