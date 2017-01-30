@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -28,10 +27,11 @@ namespace SharpNeatLander
 
         private void FrmMain_Load(object sender, System.EventArgs e)
         {
-            
+
             Instance = this;
 
-            _world = NeatWorld.CreateWorld("lander", 4, 2);
+            // _world = new NeatWorld("lander", 4, 2);
+            _world = new NeatWorld("tictactoe", 9, 1);
 
             picBox.Paint += new PaintEventHandler(this.picBox1_Paint);
         }

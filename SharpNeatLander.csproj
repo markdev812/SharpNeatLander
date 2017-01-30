@@ -145,8 +145,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimpleEvaluator.cs" />
     <Compile Include="SimpleExperiment.cs" />
+    <Compile Include="TicTacToeUnit.cs" />
     <Compile Include="Vector2.cs" />
-    <Compile Include="LanderWorld.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

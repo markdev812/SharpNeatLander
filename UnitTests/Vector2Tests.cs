@@ -1,6 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SharpNeatLander;
-using System.Diagnostics;
 
 namespace UnitTests
 {
@@ -57,6 +56,7 @@ namespace UnitTests
             Assert.IsTrue(LanderUnit.NormalizeFitness(1000, 0, 1000, 500, 200).AlmostEquals(100));
             Assert.IsTrue(LanderUnit.NormalizeFitness(500, 0, 1000, 500, 200).AlmostEquals(200));
         }
+
         [TestMethod]
         public void CalcFitnessTest()
         {
@@ -65,6 +65,7 @@ namespace UnitTests
 
 
         }
+
         [TestMethod]
         public void AngleTest()
         {
@@ -84,6 +85,7 @@ namespace UnitTests
             d = Vector2.Distance(new Vector2(-1, 1), new Vector2(1, -1));
             Assert.IsTrue(d.AlmostEquals(2.82842712474619));
         }
+
         [TestMethod]
         public void LerpTest()
         {
@@ -100,6 +102,44 @@ namespace UnitTests
             Assert.IsTrue(Mathf.Clamp(0, 1, 10).AlmostEquals(1));
             Assert.IsTrue(Mathf.Clamp(11, 1, 10).AlmostEquals(10));
             Assert.IsTrue(Mathf.Clamp(5, 1, 10).AlmostEquals(5));
+        }
+
+        [TestMethod]
+        public void FloorToIntTest()
+        {
+            Assert.AreEqual(Mathf.FloorToInt(10.0F), 10);
+            Assert.AreEqual(Mathf.FloorToInt(10.2F), 10);
+            Assert.AreEqual(Mathf.FloorToInt(10.7F), 10);
+            Assert.AreEqual(Mathf.FloorToInt(-10.0F), -10);
+            Assert.AreEqual(Mathf.FloorToInt(-10.2F), -11);
+            Assert.AreEqual(Mathf.FloorToInt(-10.7F), -11);
+        }
+
+        [TestMethod]
+        public void RandomRangeTest()
+        {
+            for (int i = 0; i < 10000; i++)
+            {
+                Assert.IsTrue(Mathf.RandomRange(-1.0, 1.0) >= -1);
+                Assert.IsTrue(Mathf.RandomRange(-1.0, 1.0) <= 1);
+                Assert.IsTrue(Mathf.RandomRange(1.0, 5.0) >= 1);
+                Assert.IsTrue(Mathf.RandomRange(5.0, 1.0) <= 5);
+                Assert.IsTrue(Mathf.RandomRange(1.0, 15.2) >= 1);
+                Assert.IsTrue(Mathf.RandomRange(15.2, 1.0) <= 15.2);
+            }
+        }
+        [TestMethod]
+        public void RandomRangeIntTest()
+        {
+            for (int i = 0; i < 10000; i++)
+            {
+                Assert.IsTrue(Mathf.RandomRange(-1, 1) >= -1);
+                Assert.IsTrue(Mathf.RandomRange(-1, 1) < 1);
+                Assert.IsTrue(Mathf.RandomRange(1, 5) >= 1);
+                Assert.IsTrue(Mathf.RandomRange(5, 1) < 5);
+                Assert.IsTrue(Mathf.RandomRange(1, 15) >= 1);
+                Assert.IsTrue(Mathf.RandomRange(15, 1) < 15);
+            }
         }
     }
 }

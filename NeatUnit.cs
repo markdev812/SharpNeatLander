@@ -8,6 +8,7 @@ namespace SharpNeatLander
         public static NeatUnit Create(string name)
         {
             if (name == "lander") return new LanderUnit();
+            if (name == "tictactoe") return new TicTacToeUnit();
 
             return null;
 
@@ -17,7 +18,7 @@ namespace SharpNeatLander
         public abstract void Compute(IBlackBox box);
         public abstract double GetFitness();
         public abstract void Render(Graphics g);
-        public virtual void PrintStats() {}
+        public virtual void PrintStats() { }
 
     }
 }

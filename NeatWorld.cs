@@ -30,27 +30,23 @@ namespace SharpNeatLander
         private Thread _runBestThread;
         private bool _running;
 
-        public static NeatWorld CreateWorld(string name, int numInputs, int numOutputs)
+        public NeatWorld(string name, int numInputs, int numOutputs)
         {
             Name = name;
             NumInputs = numInputs;
             NumOutputs = numOutputs;
 
-            if (name == "lander") return new LanderWorld();
-
-            return null;
-
         }
         public static double Evaluate(IBlackBox box)
         {
-            NeatWorld w = CreateWorld(Name, NumInputs, NumOutputs);
+            NeatWorld w = new NeatWorld(Name, NumInputs, NumOutputs);
 
             double fitness = 0;
 
             //run the trial several times and keep the best fitness
             for (int i = 0; i < 10; i++)
             {
-                double f = w.RunTrial(box);
+                double f = w.RunTrial(box, 100);
                 if (f > fitness)
                     fitness = f;
 
@@ -83,22 +79,15 @@ namespace SharpNeatLander
 
         public void StopLearning()
         {
-            _ea.Stop();
-            while (_ea.RunState == RunState.Running)
-                Thread.Sleep(1000);
+            if (_ea != null)
+            {
+                _ea.Stop();
+
+                while (_ea.RunState == RunState.Running)
+                    Thread.Sleep(1000);
+            }
         }
 
-
-
-        /// <summary>
-        /// Instantiate one unit and run it through a few updates.
-        /// </summary>
-        /// <param name="box">The phenome to run against</param>
-        /// <returns>The units fitness (0-1)</returns>
-        public virtual double RunTrial(IBlackBox box)
-        {
-            throw new NotImplementedException();
-        }
 
         public void StartRunning()
         {
@@ -110,6 +99,38 @@ namespace SharpNeatLander
         public void StopRunning()
         {
             _running = false;
+        }
+
+        /// <summary>
+        /// Instantiate one unit and run it through a few updates.
+        /// </summary>
+        /// <param name="box">The phenome to run against</param>
+        /// <param name="maxFrames">Maximum number of update iterations</param>
+        /// <returns>The units fitness (0-1)</returns>
+        public double RunTrial(IBlackBox box, int maxFrames)
+        {
+            NeatUnit unit = NeatUnit.Create(Name);
+            unit.Start(this);
+
+            //run simulation for a few frames
+            int i = 0;
+            for (i = 0; i < maxFrames; i++)
+            {
+
+                unit.Compute(box);
+
+
+                bool done = unit.Update(FixedDeltaTime); //0.25);
+
+                //    Console.WriteLine($"S:{i,-5}  X:{ship.Position.X,6:F1}  A:{ship.Position.Y,6:F1}  R:{ship.Rotation,6:F1}  Vx:{ship.Velocity.X,6:F1} Vy:{ship.Velocity.Y,6:F1} F:{ship.Fuel,6:F1}  T:{ship.Thrust,6:F1}");
+
+                if (done)
+                    break;
+
+
+            }
+            //Console.WriteLine($"Frames: {i}");
+            return unit.GetFitness();
         }
 
 

@@ -30,13 +30,13 @@ namespace SharpNeatLander
         public const double ObstacleRadius = 200;
         public double StartDistToTarget;
 
-        private bool HadCollision;
+        private bool _hadCollision;
         //private int _numCollisions;
-        private bool WentOutOfBounds;
-        private bool OutOfFuel;
+        private bool _wentOutOfBounds;
+        private bool _outOfFuel;
+        private double _desiredRotation;
 
         public Vector2 Position = new Vector2(0, 0);
-        public double DesiredRotation { get; set; }
         public double Rotation { get; set; }
         //public double Altitude { get; private set; }
         public Vector2 Velocity = new Vector2(0, 0);
@@ -44,8 +44,8 @@ namespace SharpNeatLander
         public double Thrust { get; private set; }
 
 
-        public bool Crashed => OutOfFuel || WentOutOfBounds || HadCollision;
-        public bool Landed => (Vector2.Distance(TargetPos, Position) < 5) && !OutOfFuel && !WentOutOfBounds && !HadCollision;
+        public bool Crashed => _outOfFuel || _wentOutOfBounds || _hadCollision;
+        public bool Landed => (Vector2.Distance(TargetPos, Position) < 5) && !_outOfFuel && !_wentOutOfBounds && !_hadCollision;
 
 
         private NeatWorld _world;
@@ -65,13 +65,13 @@ namespace SharpNeatLander
         {
             if (Fuel <= 0.01)
             {
-                OutOfFuel = true;
+                _outOfFuel = true;
                 Thrust = 0;
             }
 
             Fuel -= Thrust * deltaTime;
 
-            Rotation = Mathf.Lerp(Rotation, DesiredRotation, RotationRate * deltaTime);
+            Rotation = Mathf.Lerp(Rotation, _desiredRotation, RotationRate * deltaTime);
             //Rotation = DesiredRotation;
             Rotation = Mathf.Clamp(Rotation, MinRot, MaxRot);
 
@@ -87,13 +87,13 @@ namespace SharpNeatLander
 
             Position += Velocity * deltaTime;
 
-            if (!HadCollision)
-                HadCollision = (Vector2.Distance(Position, ObstaclePos) <= ObstacleRadius + 20);
+            if (!_hadCollision)
+                _hadCollision = (Vector2.Distance(Position, ObstaclePos) <= ObstacleRadius + 20);
             //if ((Vector2.Distance(Position, ObstaclePos) <= ObstacleRadius))
             //    _numCollisions++;
 
-            if (!WentOutOfBounds)
-                WentOutOfBounds = (Position.X < 0 || Position.X > _world.Width || Position.Y < 0 || Position.Y > _world.Height);
+            if (!_wentOutOfBounds)
+                _wentOutOfBounds = (Position.X < 0 || Position.X > _world.Width || Position.Y < 0 || Position.Y > _world.Height);
 
             //if (Position.Y < 0)
             //    Position.Y = 0;
@@ -104,6 +104,7 @@ namespace SharpNeatLander
             return Landed || Crashed;
 
         }
+
 
         public override void PrintStats()
         {
@@ -134,7 +135,7 @@ namespace SharpNeatLander
             //if (outputArr[0] > 0.5)
             //    ship.Thrust = 10;
             Thrust = outputArr[0] * MaxThrust;//Math.Round(outputArr[0] * 5); //Math.Floor(outputArr[0] * 4.0);
-            DesiredRotation = outputArr[1] * 360.0;
+            _desiredRotation = outputArr[1] * 360.0;
         }
 
 
