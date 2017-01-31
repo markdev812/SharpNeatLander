@@ -44,7 +44,7 @@ namespace SharpNeatLander
         public static NeatWorld Create(string name)
         {
             if (name == "lander") return new SimWorld("lander", 4, 2);
-            //if (name == "tictactoe") return new TurnBasedWorld("tictactoe", 9, 1);
+            if (name == "tictactoe") return new TicTacToeWorld("tictactoe", 9, 9);
 
             return null;
 
@@ -121,7 +121,8 @@ namespace SharpNeatLander
 
             IBlackBox box = _experiment.GetChamp();
 
-            Run(box);
+            NeatWorld w = NeatWorld.Create(Name);
+            w.Run(box);
 
         }
 

@@ -8,7 +8,7 @@ namespace SharpNeatLander
         public static NeatUnit Create(string name)
         {
             if (name == "lander") return new LanderUnit();
-            if (name == "tictactoe") return new TicTacToeUnit();
+            //if (name == "tictactoe") return new TicTacToeUnit();
 
             return null;
 

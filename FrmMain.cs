@@ -30,8 +30,8 @@ namespace SharpNeatLander
 
             Instance = this;
 
-             _world = NeatWorld.Create("lander");
-            //_world = new NeatWorld("tictactoe", 9, 1);
+            //_world = NeatWorld.Create("lander");
+            _world = new NeatWorld("tictactoe", 9, 9);
 
             picBox.Paint += picBox1_Paint;
         }
