@@ -137,6 +137,7 @@
     <Compile Include="FrmMain.Designer.cs">
       <DependentUpon>FrmMain.cs</DependentUpon>
     </Compile>
+    <Compile Include="IPlayer.cs" />
     <Compile Include="NeatUnit.cs" />
     <Compile Include="LanderUnit.cs" />
     <Compile Include="SimWorld.cs" />
@@ -147,6 +148,7 @@
     <Compile Include="SimpleEvaluator.cs" />
     <Compile Include="SimpleExperiment.cs" />
     <Compile Include="TicTacToePlayer.cs" />
+    <Compile Include="TicTacToeRandomPlayer.cs" />
     <Compile Include="TicTacToeWorld.cs" />
     <Compile Include="Vector2.cs" />
   </ItemGroup>

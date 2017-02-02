@@ -2,7 +2,7 @@
 
 namespace SharpNeatLander
 {
-    public class TicTacToePlayer
+    public class TicTacToePlayer : IPlayer
     {
 
 

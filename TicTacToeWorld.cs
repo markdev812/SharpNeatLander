@@ -15,6 +15,16 @@ namespace SharpNeatLander
             return GB[index] == 0; //unoccupied?
         }
 
+        public static bool MovesAvailable(int[] GB)
+        {
+            foreach (var i in GB)
+            {
+                if (i == 0)
+                    return true;
+            }
+            return false;
+        }
+
         private static int Sq(int v)
         {
             return v * v;
@@ -64,19 +74,20 @@ namespace SharpNeatLander
             return result;
         }
 
-        public double PlayGame(int[] GB, TicTacToePlayer p1, TicTacToePlayer p2)
+        public double PlayGame(int[] GB, IPlayer p1, IPlayer p2)
         {
             //reset game board
             for (int i = 0; i < 9; i++)
             {
                 GB[i] = 0;
             }
+            IPlayer currPlayer = p1;
 
             for (int i = 0; i < 9; i++)
             {
 
-                p1.MakeMove();
-                p2.MakeMove();
+                currPlayer.MakeMove();
+   
                 if (i >= 3)  //start checking for winner after 3 moves
                 {
                     int result = GetWinner(GB);
@@ -87,6 +98,7 @@ namespace SharpNeatLander
                     if (result == 2) //p1 lost
                         return 0;
                 }
+                currPlayer = (currPlayer == p1 ? p2 : p1);
             }
             return 0;
         }
@@ -100,7 +112,8 @@ namespace SharpNeatLander
             //we are only evaluating player 1
 
             var p1 = new TicTacToePlayer(box, GB, 1);
-            var p2 = new TicTacToePlayer(box, GB, 2); //*** this could be random or optimal player also
+            //var p2 = new TicTacToePlayer(box, GB, 2); //*** this could be random or optimal player also
+            var p2 = new TicTacToeRandomPlayer(GB, 2);
 
             double fitness = 0;
             for (int i = 0; i < 50; i++)
@@ -117,16 +130,34 @@ namespace SharpNeatLander
 
         public override void Run(IBlackBox box)
         {
-            int[] GB = new int[9];
+            int[] GB;
+            IPlayer p1, p2;
 
+            //play against random
+            for (int i = 0; i < 10; i++)
+            {
+                GB = new int[9];
+                p1 = new TicTacToePlayer(box, GB, 1);
+                p2 = new TicTacToeRandomPlayer(GB, 2);
 
-            var p1 = new TicTacToePlayer(box, GB, 1);
-            var p2 = new TicTacToePlayer(box, GB, 2);
+                PlayGame(GB, p1, p2);
+                PrintStats(GB);
+            }
+            //play against AI 
 
-            PlayGame(GB, p1, p2);
+            for (int i = 0; i < 10; i++)
+            {
+                
+            
+                GB = new int[9];
 
-            PrintStats(GB);
+                p1 = new TicTacToePlayer(box, GB, 1);
+                p2 = new TicTacToePlayer(box, GB, 2);
 
+                PlayGame(GB, p1, p2);
+                PrintStats(GB);
+
+            }
 
         }
         public void PrintStats(int[] GB)
@@ -134,7 +165,8 @@ namespace SharpNeatLander
             Debug.WriteLine($"{GB[0]} {GB[1]} {GB[2]}");
             Debug.WriteLine($"{GB[3]} {GB[4]} {GB[5]}");
             Debug.WriteLine($"{GB[6]} {GB[7]} {GB[8]}");
-            Debug.WriteLine("");
+            int w = GetWinner(GB);
+            Debug.WriteLine(w==3?"Draw":$"Winner: {w}" );
 
         }
     }
